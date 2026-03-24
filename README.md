@@ -50,4 +50,4 @@ docker compose up
 ```
 
 ## Project Status
-🚧 In active development — started March 2026
+In active development — started March 2026
