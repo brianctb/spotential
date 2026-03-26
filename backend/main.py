@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from routers.business import router as business_router
 
-app = FastAPI()
+app = FastAPI(title="Spotential API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -9,6 +10,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(business_router)
 
 @app.get("/")
 async def root():

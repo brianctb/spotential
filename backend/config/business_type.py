@@ -1,6 +1,6 @@
 from enum import Enum
 from pydantic import BaseModel
-from osm import OSMTags
+from config.osm import OSMTags
 
 class BusinessCategory(str, Enum):
     FITNESS = "fitness"
