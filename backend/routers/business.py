@@ -1,9 +1,10 @@
 from fastapi import APIRouter
 from config.business_type import BUSINESS_CONFIGS
-from schema.business import BusinessCategoryResponse, BusinessTypeResponse
+from schema.response import BusinessCategoryResponse, BusinessTypeResponse
 from config.business_type import BusinessCategory
 
 router = APIRouter(prefix="/business", tags=["business"])
+
 
 @router.get("/categories", response_model=list[BusinessCategoryResponse])
 async def get_business_categories():

@@ -1,11 +1,12 @@
 from pydantic import BaseModel
 
+from config.business_type import BusinessCategory, BusinessType
 
-class BusinessTypeResponse(BaseModel):
-    key: str
-    label: str
 
-class BusinessCategoryResponse(BaseModel):
-    key: str
-    label: str
-    business: list[BusinessTypeResponse]
+class Business(BaseModel):
+    id: int
+    lat: float
+    lng: float
+    name: str
+    business_type: BusinessType
+    business_category: BusinessCategory

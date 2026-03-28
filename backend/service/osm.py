@@ -1,0 +1,54 @@
+# services/osm.py
+import httpx
+from config.business_type import BUSINESS_CONFIGS
+from schema.business import Business
+from config.business_type import BusinessType
+
+OVERPASS_URL = "http://overpass-api.de/api/interpreter"
+
+
+def parse_element(element: dict) -> dict | None:
+    point_lat = element.get("lat") or element.get("center", {}).get("lat")
+    point_lng = element.get("lon") or element.get("center", {}).get("lon")
+    osm_id = element.get("id")
+    if not point_lat or not point_lng or not osm_id:
+        return None
+    return {
+        "id": osm_id,
+        "name": element.get("tags", {}).get("name", "Unknown"),
+        "lat": point_lat,
+        "lng": point_lng,
+    }
+
+
+async def fetch_businesses(
+        business_type: BusinessType,
+        lat: float,
+        lng: float,
+        radius: int
+) -> list[Business]:
+    config = BUSINESS_CONFIGS[business_type]
+    query = config.osm_query.to_nwr(lat, lng, radius)
+    print(query)
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            OVERPASS_URL,
+            data={"data": query},
+            timeout=30
+        )
+        response.raise_for_status()
+        data = response.json()
+
+    businesses = []
+    for element in data.get("elements", []):
+        osm_info = parse_element(element)
+        business = Business(
+            business_type=business_type,
+            business_category=config.category,
+            **osm_info
+        )
+        if business:
+            businesses.append(business)
+
+    return businesses
