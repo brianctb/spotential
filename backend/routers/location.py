@@ -1,13 +1,10 @@
-from fastapi import APIRouter, HTTPException
-import httpx
-from config.business_type import BUSINESS_CONFIGS, BusinessType
-from schema.business import BusinessesResponse, Business
-from service.osm import fetch_businesses
+from fastapi import APIRouter, Depends
+from config.business_type import BusinessType
+from schema.response import BusinessesResponse
+from service.OSMService import OSMService
+from dependencies import get_osm_service
 
 router = APIRouter(prefix="/locations", tags=["locations"])
-
-OVERPASS_URL = "https://overpass.kumi.systems/api/interpreter"
-
 
 @router.get("/businesses", response_model=BusinessesResponse)
 async def get_businesses(
@@ -15,6 +12,7 @@ async def get_businesses(
         lat: float,
         lng: float,
         radius: int = 2000,
+        service: OSMService = Depends(get_osm_service),
 ):
-    businesses = await fetch_businesses(business_type, lat, lng, radius)
+    businesses = await service.fetch_businesses(business_type, lat, lng, radius)
     return BusinessesResponse(businesses=businesses, count=len(businesses))

@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-
 from config.business_type import BusinessCategory, BusinessType
 
 

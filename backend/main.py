@@ -1,9 +1,21 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers.business import router as business_router
 from routers.location import router as location_router
+import httpx
 
-app = FastAPI(title="Spotential API")
+@asynccontextmanager
+async def lifespan(fastapi_app: FastAPI):
+    http_client = httpx.AsyncClient()
+    fastapi_app.state.http_client = http_client
+    yield
+    await http_client.aclose()
+
+app = FastAPI(
+    title="Spotential API",
+    lifespan=lifespan,
+)
 
 app.add_middleware(
     CORSMiddleware,
