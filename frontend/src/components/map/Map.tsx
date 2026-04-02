@@ -1,6 +1,6 @@
 "use client";
 
-import Map, { NavigationControl, Marker } from "react-map-gl/maplibre";
+import Map, { NavigationControl } from "react-map-gl/maplibre";
 import type { MapRef } from "react-map-gl/maplibre";
 import { PinMarker } from "@/components/map/PinMarker";
 import { useRef, useState } from "react";
@@ -25,7 +25,10 @@ export const SpotentialMap = () => {
             }}
         >
             <NavigationControl position="top-right" />
-            {pin && PinMarker({ lng: pin.lng, lat: pin.lat })}
+            {pin && PinMarker({
+                lng: pin.lng,
+                lat: pin.lat
+            })}
         </Map>
     );
 }
