@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { businessApi } from "@/api/business";
 import {
     Sidebar,
     SidebarContent,
@@ -18,49 +20,15 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { BusinessCategoryResponse } from "@/types/business";
 import { cn } from "@/lib/utils";
-
-const CATEGORIES = [
-    {
-        key: "fitness",
-        label: "Fitness",
-        types: [
-            { key: "fitness_centre", label: "Gym" },
-            { key: "ice_rink", label: "Ice Rink" },
-        ],
-    },
-    {
-        key: "food",
-        label: "Food & Drink",
-        types: [
-            { key: "restaurant", label: "Restaurant" },
-            { key: "cafe", label: "Cafe" },
-            { key: "fast_food", label: "Fast Food" },
-            { key: "bar", label: "Bar" },
-        ],
-    },
-    {
-        key: "retail",
-        label: "Retail",
-        types: [
-            { key: "supermarket", label: "Supermarket" },
-            { key: "convenience", label: "Convenience Store" },
-            { key: "bakery", label: "Bakery" },
-        ],
-    },
-    {
-        key: "service",
-        label: "Services",
-        types: [
-            { key: "bank", label: "Bank" },
-            { key: "clinic", label: "Clinic" },
-            { key: "dentist", label: "Dentist" },
-        ],
-    },
-];
 
 export function BusinessSidebar() {
     const [selectedType, setSelectedType] = useState<string>("");
+    const { data: menu, isLoading, isError } = useQuery<BusinessCategoryResponse[]>({
+        queryKey: ["business-menu"],
+        queryFn: businessApi.getMenu,
+    });
 
     return (
         <Sidebar className="border-r">
@@ -74,9 +42,9 @@ export function BusinessSidebar() {
                 </p>
 
                 <Accordion type="multiple" className="w-full">
-                    {CATEGORIES.map((category) => (
+                    {menu?.map((category) => (
                         // each category is a group
-                        <SidebarGroup key={category.key}>
+                        <SidebarGroup key={category?.key}>
                             <AccordionItem value={category.key}>
                                 <AccordionTrigger>
                                     <SidebarGroupLabel>
@@ -90,17 +58,17 @@ export function BusinessSidebar() {
                                             onValueChange={setSelectedType}
                                             className="space-y-1"
                                         >
-                                            {category.types.map((type) => (
+                                            {category.business.map((business) => (
                                                 <div
-                                                    key={type.key}
+                                                    key={business.key}
                                                     className="flex items-center space-x-2"
                                                 >
                                                     <RadioGroupItem
-                                                        value={type.key}
-                                                        id={type.key}
+                                                        value={business.key}
+                                                        id={business.key}
                                                     />
-                                                    <Label htmlFor={type.key}>
-                                                        {type.label}
+                                                    <Label htmlFor={business.key}>
+                                                        {business.label}
                                                     </Label>
                                                 </div>
                                             ))}
