@@ -12,6 +12,7 @@ class BusinessCategoryResponse(BaseModel):
     label: str
     business: list[BusinessTypeResponse]
 
+
 class BusinessesResponse(BaseModel):
     businesses: list[Business]
     count: int

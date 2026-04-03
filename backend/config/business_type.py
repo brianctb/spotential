@@ -9,6 +9,18 @@ class BusinessCategory(str, Enum):
     RETAIL = "retail"
     SERVICE = "service"
 
+    @property
+    def label(self) -> str:
+        return CATEGORY_LABELS[self]
+
+
+CATEGORY_LABELS = {
+    BusinessCategory.FITNESS: "Fitness",
+    BusinessCategory.FOOD: "Food & Drink",
+    BusinessCategory.RETAIL: "Retail",
+    BusinessCategory.SERVICE: "Service",
+}
+
 
 class BusinessType(str, Enum):
     # Fitness

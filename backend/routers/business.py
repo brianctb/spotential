@@ -6,8 +6,8 @@ from config.business_type import BusinessCategory
 router = APIRouter(prefix="/business", tags=["business"])
 
 
-@router.get("/categories", response_model=list[BusinessCategoryResponse])
-async def get_business_categories():
+@router.get("/menu", response_model=list[BusinessCategoryResponse])
+async def get_menu():
     grouped: dict[BusinessCategory, list[BusinessTypeResponse]] = {}
 
     for key, config in BUSINESS_CONFIGS.items():
@@ -20,7 +20,7 @@ async def get_business_categories():
     categories = [
         BusinessCategoryResponse(
             key=category,
-            label=category,
+            label=category.label,
             business=types
         )
         for category, types in grouped.items()
