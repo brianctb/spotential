@@ -5,10 +5,12 @@ import type { MapRef } from "react-map-gl/maplibre";
 import { PinMarker } from "@/components/map/PinMarker";
 import { useRef, useState } from "react";
 import { MAP_CONFIG } from "@/configs/map";
+import { useMapStore } from "@/store/mapStore";
 
 export const SpotentialMap = () => {
     const mapRef = useRef<MapRef>(null);
-    const [pin, setPin] = useState<{ lng: number; lat: number } | null>(null);
+    const setPinLocation = useMapStore((state) => state.setPinLocation);
+    const pinLocation = useMapStore((state) => state.pinLocation);
 
     return (
         <Map
@@ -21,13 +23,13 @@ export const SpotentialMap = () => {
             maxZoom={MAP_CONFIG.limits.maxZoom}
             onClick={(e) => {
                 const { lng, lat } = e.lngLat;
-                setPin({ lng, lat });
+                setPinLocation({ lng, lat });
             }}
         >
             <NavigationControl position="top-right" />
-            {pin && PinMarker({
-                lng: pin.lng,
-                lat: pin.lat
+            {pinLocation && PinMarker({
+                lng: pinLocation.lng,
+                lat: pinLocation.lat
             })}
         </Map>
     );

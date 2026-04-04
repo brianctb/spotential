@@ -20,11 +20,18 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { BusinessCategoryResponse } from "@/types/business";
+import { BusinessCategoryResponse, BusinessType } from "@/types/business";
+import { useMapStore } from "@/store/mapStore";
 import { cn } from "@/lib/utils";
 
 export function BusinessSidebar() {
-    const [selectedType, setSelectedType] = useState<string>("");
+
+    // store states
+    const selectedType = useMapStore((state) => state.selectedType);
+    const setSelectedType = useMapStore((state) => state.setSelectedType);
+    const pinLocation = useMapStore((state) => state.pinLocation);
+
+    // fetching
     const { data: menu, isLoading, isError } = useQuery<BusinessCategoryResponse[]>({
         queryKey: ["business-menu"],
         queryFn: businessApi.getMenu,
@@ -55,7 +62,7 @@ export function BusinessSidebar() {
                                     <SidebarGroupContent>
                                         <RadioGroup
                                             value={selectedType}
-                                            onValueChange={setSelectedType}
+                                            onValueChange={(value) => setSelectedType(value as BusinessType)}
                                             className="space-y-1"
                                         >
                                             {category.business.map((business) => (
@@ -82,6 +89,7 @@ export function BusinessSidebar() {
                 <div className="mt-4 flex justify-center">
                     <Button
                         className="w-40"
+                        disabled={!selectedType || !pinLocation}
                     >
                         Spotentiate
                     </Button>
