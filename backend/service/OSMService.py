@@ -1,6 +1,8 @@
 import httpx
 from config.business_type import BUSINESS_CONFIGS, BusinessType
 from schema.business import Business
+from fastapi import HTTPException
+
 
 class OSMService:
     def __init__(self, client: httpx.AsyncClient, base_url: str):
@@ -24,22 +26,29 @@ class OSMService:
         }
 
     async def fetch_businesses(
-        self,
-        business_type: BusinessType,
-        lat: float,
-        lng: float,
-        radius: int
+            self,
+            business_type: BusinessType,
+            lat: float,
+            lng: float,
+            radius: int
     ) -> list[Business]:
         config = BUSINESS_CONFIGS[business_type]
         query = config.osm_query.to_nwr(lat, lng, radius)
 
-        response = await self.client.post(
-            self.base_url,
-            data={"data": query},
-            timeout=30
-        )
-        response.raise_for_status()
-        data = response.json()
+        try:
+            response = await self.client.post(
+                self.base_url,
+                data={"data": query},
+                timeout=30
+            )
+            response.raise_for_status()
+            data = response.json()
+
+        except httpx.ReadTimeout:
+            raise HTTPException(
+                status_code=504,
+                detail="External API timed out"
+            )
 
         businesses = []
         for element in data.get("elements", []):
