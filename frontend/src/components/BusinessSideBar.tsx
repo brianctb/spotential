@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { businessApi } from "@/api/business";
 import {
@@ -20,7 +20,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { BusinessCategoryResponse, BusinessType } from "@/types/business";
+import { BusinessCategoryResponse, BusinessesResponse, BusinessType } from "@/types/business";
 import { useMapStore } from "@/store/mapStore";
 import { cn } from "@/lib/utils";
 
@@ -29,13 +29,29 @@ export function BusinessSidebar() {
     // store states
     const selectedType = useMapStore((state) => state.selectedType);
     const setSelectedType = useMapStore((state) => state.setSelectedType);
-    const pinLocation = useMapStore((state) => state.pinLocation);
+    const draftPinLocation = useMapStore((state) => state.draftPin);
+    const setDraftPinLocation = useMapStore((state) => state.setDraftPin);
+    const searchPinLocation = useMapStore((state) => state.searchPin);
+    const setSearchPinLocation = useMapStore((state) => state.setSearchPin);
+    const [businessType, setBusinessType] = useState<BusinessType | null>(null);
 
     // fetching
     const { data: menu, isLoading, isError } = useQuery<BusinessCategoryResponse[]>({
         queryKey: ["business-menu"],
         queryFn: businessApi.getMenu,
     });
+
+    const { isFetching } = useQuery<BusinessesResponse>({
+        queryKey: ["businesses", selectedType, searchPinLocation?.lng, searchPinLocation?.lat],
+        queryFn: () =>
+            businessApi.getBusinesses(
+                selectedType!,
+                searchPinLocation!.lng,
+                searchPinLocation!.lat
+            ),
+        enabled: !!selectedType && !!searchPinLocation
+    });
+
 
     return (
         <Sidebar className="border-r">
@@ -61,8 +77,8 @@ export function BusinessSidebar() {
                                 <AccordionContent>
                                     <SidebarGroupContent>
                                         <RadioGroup
-                                            value={selectedType}
-                                            onValueChange={(value) => setSelectedType(value as BusinessType)}
+                                            value={businessType}
+                                            onValueChange={(value) => setBusinessType(value as BusinessType)}
                                             className="space-y-1"
                                         >
                                             {category.business.map((business) => (
@@ -89,7 +105,12 @@ export function BusinessSidebar() {
                 <div className="mt-4 flex justify-center">
                     <Button
                         className="w-40"
-                        disabled={!selectedType || !pinLocation}
+                        disabled={!businessType || !draftPinLocation || isFetching}
+                        onClick={() => {
+                            setSelectedType(businessType);
+                            setSearchPinLocation(draftPinLocation);
+                            setDraftPinLocation(null);
+                        }}
                     >
                         Spotentiate
                     </Button>

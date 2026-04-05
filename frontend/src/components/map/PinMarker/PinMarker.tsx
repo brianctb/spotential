@@ -1,17 +1,7 @@
 "use client";
 
 import { Marker } from "react-map-gl/maplibre"
-
-
-interface PinMarkerProps {
-    lng: number;
-    lat: number;
-    src?: string;
-    size?: number;
-    alt?: string;
-    className?: string;
-    onClick?: () => void;
-}
+import { PinMarkerProps } from "./PinMarker.type";
 
 export const PinMarker = ({
     lng,
