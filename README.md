@@ -1,61 +1,73 @@
-# Spotential
+# 📍 Spotential
 
 > Location intelligence platform — score any Vancouver location for business success using ML and open data.
 
 ## What It Does
 
-- User selects a business type (gym, restaurant, grocery, etc)
-- User clicks any location in Vancouver on the map
-- ML model scores the location across demographics, competition, and transit access
-- Returns a 0-100 score with breakdown and opportunity insights
+- **Business Selection:** User selects a business type (gym, restaurant, grocery, etc.).
+- **Spatial Search:** User clicks any location in Vancouver on an interactive map.
+- **ML Scoring:** A custom XGBoost model scores the location based on demographics, competitor density, and transit accessibility.
+- **Deep Insights:** Returns a 0-100 score with a visual breakdown of components and opportunity gap detection.
 
 ## Tech Stack
 
 ### Frontend
 
-- Next.js 15, TypeScript, Tailwind CSS, shadcn/ui
-- React Leaflet, Recharts, TanStack Query
+- **Framework:** Next.js 15, TypeScript, Tailwind CSS, shadcn/ui
+- **Maps:** Maplibre
+- **Data Fetching:** TanStack Query (React Query)
+- **State:** Zustand
 
 ### Backend
 
-- FastAPI, Pydantic v2, SQLModel, Alembic
-- Python 3.12, uv
+- **API:** FastAPI (Python 3.12)
+- **Database:** Neon PostgreSQL + **PostGIS** (Spatial Engine)
+- **ORM:** SQLModel (SQLAlchemy + Pydantic v2)
+- **Migrations:** Alembic
+- **Tooling:** **uv** for lightning-fast package management
 
-### Data Sources
+### Data Science & ML
 
-- OpenStreetMap Overpass API — competitor locations
-- Statistics Canada Census — demographics, tract
-- TransLink GTFS — transit access
+- **Processing:** Polars (high-performance data manipulation)
+- **Modeling:** XGBoost (Regression), scikit-learn (K-Means, Isolation Forest)
+- **Geospatial:** GeoPandas
+- **Tracking:** MLflow, joblib
 
-### ML
-
-- XGBoost — location score regression
-- scikit-learn — Isolation Forest + K-Means
-- Polars, joblib, MLflow
-
-### Infrastructure
-
-- Docker + Docker Compose
-- Vercel (frontend)
-- GitHub Actions CI/CD
+---
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
-- Python 3.12+
-- uv
-- Docker
+1. **Node.js 18+** & **pnpm**
+2. **Python 3.12+**
+3. **uv** — [Installation Guide](https://github.com/astral-sh/uv) (Required for Python environment management)
+4. **Docker** (Optional for local DB, Neon Cloud used for production)
 
-### Run Locally
+### 1. Backend Setup
+
+The backend handles geospatial logic and ML inference.
 
 ```bash
-# Clone the repo
-git clone https://github.com/yourusername/spotential.git
-cd spotential
+cd backend
+
+# Install dependencies
+uv sync
+
+# Start the dev server
+uv run fastapi dev
 ```
 
-## Project Status
+### 1. Frontend Setup
 
-In active development — started March 2026
+The backend handles geospatial logic and ML inference.
+
+```bash
+cd frontend
+
+# Install dependencies
+pnpm install
+
+# Start the front end
+pnpm dev
+```
