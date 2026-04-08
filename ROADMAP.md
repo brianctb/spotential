@@ -20,12 +20,12 @@
 
 - [x] **Database:** Set up Neon PostgreSQL + Enable PostGIS extension.
 - [x] **Infrastructure:** Create Neon account and production database branch.
-- [ ] **Geometry:** Download StatCan Census Tract (CT) shapefiles for BC.
-- [ ] **Ingestion:** Script `load_census_tract.py` using **GeoPandas** to push shapes to PostGIS.
-- [ ] **Demographics:** Download Census CSV (Income, Pop, Age).
-- [ ] **Ingestion:** Script `load_census_demographics.py` using **Polars**.
-- [ ] **Database Schema:** Define `CensusTract` and `CensusDemographics` via **SQLModel**.
-- [ ] **Migrations:** Initialize **Alembic** and run first migration to create tables.
+- [x] **Geometry:** Download StatCan Census Tract (CT) shapefiles for BC.
+- [x] **Ingestion:** Script `load_census_tract.py` using **GeoPandas** to push shapes to PostGIS.
+- [x] **Demographics:** Download Census CSV (Income, Pop, Age).
+- [x] **Ingestion:** Script `load_census_demographics.py` using **Polars**.
+- [x] **Database Schema:** Define `CensusTract` and `CensusDemographics` via **SQLModel**.
+- [x] **Migrations:** Initialize **Alembic** and run first migration to create tables.
 - [ ] **Spatial Logic:** Build `CensusService` to find tract by Lat/Lng via `ST_Contains`.
 - [ ] **Transit Layer:** Load TransLink GTFS stops; build proximity scoring (stops within 500m).
 - [ ] **Unified API:** Build `GET` endpoint to return all data for a clicked point.
