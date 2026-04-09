@@ -10,7 +10,7 @@ class CensusTract(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     tract_id: str = Field(unique=True)
     geom: str = Field(
-        sa_column=Column(Geometry("MULTIPOLYGON", srid=4326, spatial_index=True))
+        sa_column=Column(Geometry("MULTIPOLYGON", srid=4326))
     )
 
 
@@ -18,7 +18,7 @@ class CensusDemographics(SQLModel, table=True):
     __tablename__ = "census_demographics"
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    tract_id: str = Field(foreign_key="census_tracts.tract_id", unique=True)
+    tract_id: str = Field(foreign_key=CensusTract.tract_id, unique=True)
 
     population: Optional[int]
     population_density: Optional[float]
