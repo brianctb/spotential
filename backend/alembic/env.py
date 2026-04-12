@@ -6,7 +6,8 @@ from sqlalchemy import pool
 from alembic import context
 
 from dotenv import load_dotenv
-from models.census import CensusDemographics
+from models.census import CensusDemographics, CensusTract
+from models.business import Business
 from sqlmodel import SQLModel
 import os
 
@@ -26,6 +27,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = SQLModel.metadata
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -68,12 +70,8 @@ def include_object(object, name, type_, reflected, compare_to):
     ]:
         return False
 
-    # 2. Ignore the spatial index managed by GeoAlchemy2
-    # This prevents Alembic from trying to "re-create" it
-    if type_ == "index" and name == "idx_census_tracts_geom":
-        return False
-
     return True
+
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
