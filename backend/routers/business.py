@@ -1,7 +1,10 @@
-from fastapi import APIRouter
-from config.business_type import BUSINESS_CONFIGS
+from fastapi import APIRouter, Depends
+from config.business_type import BUSINESS_CONFIGS, BusinessType
 from schema.response import BusinessCategoryResponse, BusinessTypeResponse
 from config.business_type import BusinessCategory
+from service.BusinessService import BusinessService
+from dependencies import get_business_service
+from typing import Optional
 
 router = APIRouter(prefix="/business", tags=["business"])
 
@@ -27,3 +30,12 @@ async def get_menu():
     ]
 
     return categories
+
+
+@router.get("/tract/{tract_id}")
+async def get_business_from_tract(
+        tract_id: str,
+        business_type: Optional[BusinessType] = None,
+        service: BusinessService = Depends(get_business_service),
+):
+    return service.get_business_from_tract(tract_id, business_type)
