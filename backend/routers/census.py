@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from schema.response import CensusInfoResponse
 from service.CensusService import CensusService
 from dependencies import get_census_service
 
@@ -17,7 +18,7 @@ def find_tract(
     return {"tract_id": tract_id}
 
 
-@router.get("/{tract_id}")
+@router.get("/{tract_id}", response_model=CensusInfoResponse)
 def get_tract_details(
         tract_id: str,
         service: CensusService = Depends(get_census_service),
