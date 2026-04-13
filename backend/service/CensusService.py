@@ -1,5 +1,6 @@
 from models.census import CensusTract, CensusDemographics
 from sqlmodel import Session, func, select
+from schema.response import CensusInfoResponse, CensusDemographicsBase
 import json
 
 
@@ -13,9 +14,9 @@ class CensusService:
         statement = select(CensusTract.tract_id).where(
             func.ST_Contains(CensusTract.geom, point)
         )
-        return self.session.exec(statement).first()
+        return self.session.scalar(statement)
 
-    def get_tract_details(self, tract_id: str):
+    def get_tract_details(self, tract_id: str) -> CensusInfoResponse | None:
         stmt_tract = select(
             CensusTract,
             func.ST_AsGeoJSON(CensusTract.geom).label("geojson")
@@ -31,9 +32,10 @@ class CensusService:
             CensusDemographics.tract_id == tract_id
         )
         demo = self.session.exec(stmt_demo).first()
+        demo = CensusDemographicsBase.model_validate(demo)
 
-        return {
-            "tract_id": tract.tract_id,
-            "geometry": json.loads(geojson_str),
-            "demographics": demo
-        }
+        return CensusInfoResponse(
+            tract_id=tract.tract_id,
+            geometry=json.loads(geojson_str),
+            demographics=demo
+        )

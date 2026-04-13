@@ -1,7 +1,8 @@
 from config.business_type import BusinessType
-from models.business import Business
+from models.business import Business, BusinessBase
+from schema.response import BusinessInfoResponse
 from sqlmodel import Session, func, select
-from typing import Sequence, Optional
+from typing import Optional
 import json
 
 
@@ -10,11 +11,11 @@ class BusinessService:
         self.session: Session = session
 
     def get_business_from_tract(
-            self,
-            tract_id: str,
-            business_type: Optional[BusinessType] = None
-    ):
-        # Select the WHOLE model plus the function
+        self,
+        tract_id: str,
+        business_type: Optional[BusinessType] = None
+    ) -> list[BusinessInfoResponse]:
+
         stmt = (
             select(
                 Business,
@@ -29,10 +30,10 @@ class BusinessService:
 
         output = []
         for business_obj, geojson_str in results:
-            data = {
-                "id": business_obj.id,
-                "name": business_obj.name,
-                "geometry": json.loads(geojson_str)
-            }
-            output.append(data)
+            details = BusinessBase.model_validate(business_obj)
+            geom = json.loads(geojson_str)
+            output.append(BusinessInfoResponse(
+                details=details,
+                geometry=geom
+            ))
         return output
