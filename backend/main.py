@@ -3,7 +3,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers.business import router as business_router
 from routers.location import router as location_router
+from routers.census import router as census_router
 import httpx
+
 
 @asynccontextmanager
 async def lifespan(fastapi_app: FastAPI):
@@ -11,6 +13,7 @@ async def lifespan(fastapi_app: FastAPI):
     fastapi_app.state.http_client = http_client
     yield
     await http_client.aclose()
+
 
 app = FastAPI(
     title="Spotential API",
@@ -26,6 +29,7 @@ app.add_middleware(
 
 app.include_router(business_router)
 app.include_router(location_router)
+app.include_router(census_router)
 
 
 @app.get("/")
