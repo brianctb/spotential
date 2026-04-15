@@ -2,7 +2,6 @@ from enum import Enum
 from pydantic import BaseModel
 from config.osm import OSMTags, OSMQuery
 
-
 class BusinessCategory(str, Enum):
     FITNESS = "fitness"
     FOOD = "food & drink"
@@ -44,13 +43,14 @@ class BusinessType(str, Enum):
 
 
 class BusinessConfig(BaseModel):
+    id: int
     label: str
     category: BusinessCategory
     osm_query: OSMQuery
 
-
 BUSINESS_CONFIGS: dict[BusinessType, BusinessConfig] = {
     BusinessType.FITNESS_CENTRE: BusinessConfig(
+        id=1,
         label="Gym",
         category=BusinessCategory.FITNESS,
         osm_query=OSMQuery(
@@ -58,43 +58,63 @@ BUSINESS_CONFIGS: dict[BusinessType, BusinessConfig] = {
         ),
     ),
     BusinessType.RESTAURANT: BusinessConfig(
-        label="Restaurant", category=BusinessCategory.FOOD,
+        id=2,
+        label="Restaurant",
+        category=BusinessCategory.FOOD,
         osm_query=OSMQuery(filters=['["amenity"="restaurant"]'])
     ),
     BusinessType.CAFE: BusinessConfig(
-        label="Cafe", category=BusinessCategory.FOOD,
+        id=3,
+        label="Cafe",
+        category=BusinessCategory.FOOD,
         osm_query=OSMQuery(filters=['["amenity"="cafe"]'])
     ),
     BusinessType.FAST_FOOD: BusinessConfig(
-        label="Fast Food", category=BusinessCategory.FOOD,
+        id=4,
+        label="Fast Food",
+        category=BusinessCategory.FOOD,
         osm_query=OSMQuery(filters=['["amenity"="fast_food"]'])
     ),
     BusinessType.BAR: BusinessConfig(
-        label="Bar", category=BusinessCategory.FOOD,
+        id=5,
+        label="Bar",
+        category=BusinessCategory.FOOD,
         osm_query=OSMQuery(filters=['["amenity"="bar"]'])
     ),
     BusinessType.SUPERMARKET: BusinessConfig(
-        label="Supermarket", category=BusinessCategory.RETAIL,
+        id=6,
+        label="Supermarket",
+        category=BusinessCategory.RETAIL,
         osm_query=OSMQuery(filters=['["shop"="supermarket"]'])
     ),
     BusinessType.CONVENIENCE: BusinessConfig(
-        label="Convenience Store", category=BusinessCategory.RETAIL,
+        id=7,
+        label="Convenience Store",
+        category=BusinessCategory.RETAIL,
         osm_query=OSMQuery(filters=['["shop"="convenience"]'])
     ),
     BusinessType.BAKERY: BusinessConfig(
-        label="Bakery", category=BusinessCategory.RETAIL,
+        id=8,
+        label="Bakery",
+        category=BusinessCategory.RETAIL,
         osm_query=OSMQuery(filters=['["shop"="bakery"]'])
     ),
     BusinessType.BANK: BusinessConfig(
-        label="Bank", category=BusinessCategory.SERVICE,
+        id=9,
+        label="Bank",
+        category=BusinessCategory.SERVICE,
         osm_query=OSMQuery(filters=['["amenity"="bank"]'])
     ),
     BusinessType.CLINIC: BusinessConfig(
-        label="Clinic", category=BusinessCategory.SERVICE,
+        id=10,
+        label="Clinic",
+        category=BusinessCategory.SERVICE,
         osm_query=OSMQuery(filters=['["amenity"="clinic"]'])
     ),
     BusinessType.DENTIST: BusinessConfig(
-        label="Dentist", category=BusinessCategory.SERVICE,
+        id=11,
+        label="Dentist",
+        category=BusinessCategory.SERVICE,
         osm_query=OSMQuery(filters=['["amenity"="dentist"]'])
     ),
 }
