@@ -21,6 +21,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/business/tract/{tract_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Business From Tract */
+        get: operations["get_business_from_tract_business_tract__tract_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/locations/businesses": {
         parameters: {
             query?: never;
@@ -30,6 +47,57 @@ export interface paths {
         };
         /** Get Businesses */
         get: operations["get_businesses_locations_businesses_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/locations/analysis": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Analysis */
+        get: operations["get_analysis_locations_analysis_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/census/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Find Tract */
+        get: operations["find_tract_census_search_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/census/{tract_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Tract Details */
+        get: operations["get_tract_details_census__tract_id__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -76,6 +144,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AnalysisResponse */
+        AnalysisResponse: {
+            census: components["schemas"]["CensusFeature"];
+            businesses: components["schemas"]["BusinessCollection"];
+        };
         /** Business */
         Business: {
             /** Id */
@@ -88,6 +161,25 @@ export interface components {
             name: string;
             business_type: components["schemas"]["BusinessType"];
             business_category: components["schemas"]["BusinessCategory"];
+        };
+        /** BusinessBase */
+        BusinessBase: {
+            /** Osm Id */
+            osm_id: number;
+            /** Tract Id */
+            tract_id: string | null;
+            /** Name */
+            name: string;
+            type: components["schemas"]["BusinessType"];
+            category: components["schemas"]["BusinessCategory"];
+            /** Website */
+            website?: string | null;
+            /** Opening Hours */
+            opening_hours?: string | null;
+            /** Lng */
+            lng: number;
+            /** Lat */
+            lat: number;
         };
         /**
          * BusinessCategory
@@ -102,6 +194,28 @@ export interface components {
             label: string;
             /** Business */
             business: components["schemas"]["BusinessTypeResponse"][];
+        };
+        /** BusinessCollection */
+        BusinessCollection: {
+            /**
+             * Type
+             * @default FeatureCollection
+             * @constant
+             */
+            type: "FeatureCollection";
+            /** Features */
+            features: components["schemas"]["BusinessFeature"][];
+        };
+        /** BusinessFeature */
+        BusinessFeature: {
+            /**
+             * Type
+             * @default Feature
+             * @constant
+             */
+            type: "Feature";
+            geometry: components["schemas"]["Geometry"];
+            properties: components["schemas"]["BusinessBase"];
         };
         /**
          * BusinessType
@@ -121,6 +235,62 @@ export interface components {
             businesses: components["schemas"]["Business"][];
             /** Count */
             count: number;
+        };
+        /** CensusDemographicsBase */
+        CensusDemographicsBase: {
+            /** Tract Id */
+            tract_id: string;
+            /** Population */
+            population?: number | null;
+            /** Population Density */
+            population_density?: number | null;
+            /** Count Age 15 64 */
+            count_age_15_64?: number | null;
+            /** Household Count */
+            household_count?: number | null;
+            /** Median Household Income */
+            median_household_income?: number | null;
+            /** Education Base Pop 25 Plus */
+            education_base_pop_25_plus?: number | null;
+            /** Count Postsecondary Edu Plus */
+            count_postsecondary_edu_plus?: number | null;
+            /** Pct Working Age */
+            pct_working_age?: number | null;
+            /** Pct Highly Educated */
+            pct_highly_educated?: number | null;
+            /** Avg Household Size */
+            avg_household_size?: number | null;
+        };
+        /** CensusFeature */
+        CensusFeature: {
+            /**
+             * Type
+             * @default Feature
+             * @constant
+             */
+            type: "Feature";
+            geometry: components["schemas"]["Geometry"];
+            properties: components["schemas"]["CensusDemographicsBase"];
+        };
+        /** CensusInfoResponse */
+        CensusInfoResponse: {
+            /** Tract Id */
+            tract_id: string;
+            demographics: components["schemas"]["CensusDemographicsBase"];
+            /** Geometry */
+            geometry: {
+                [key: string]: unknown;
+            };
+        };
+        /** Geometry */
+        Geometry: {
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "Point" | "LineString" | "Polygon" | "MultiPolygon";
+            /** Coordinates */
+            coordinates: unknown;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -169,6 +339,39 @@ export interface operations {
             };
         };
     };
+    get_business_from_tract_business_tract__tract_id__get: {
+        parameters: {
+            query?: {
+                business_type?: components["schemas"]["BusinessType"] | null;
+            };
+            header?: never;
+            path: {
+                tract_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_businesses_locations_businesses_get: {
         parameters: {
             query: {
@@ -190,6 +393,102 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BusinessesResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_analysis_locations_analysis_get: {
+        parameters: {
+            query: {
+                lng: number;
+                lat: number;
+                business_type: components["schemas"]["BusinessType"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalysisResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    find_tract_census_search_get: {
+        parameters: {
+            query: {
+                lng: number;
+                lat: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_tract_details_census__tract_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tract_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CensusInfoResponse"];
                 };
             };
             /** @description Validation Error */
