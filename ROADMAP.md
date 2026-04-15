@@ -26,9 +26,10 @@
 - [x] **Ingestion:** Script `load_census_demographics.py` using **Polars**.
 - [x] **Database Schema:** Define `CensusTract` and `CensusDemographics` via **SQLModel**.
 - [x] **Migrations:** Initialize **Alembic** and run first migration to create tables.
-- [ ] **Spatial Logic:** Build `CensusService` to find tract by Lat/Lng via `ST_Contains`.
+- [x] **Spatial Logic:** Build `CensusService` to find tract by Lat/Lng via `ST_Contains`.
 - [ ] **Transit Layer:** Load TransLink GTFS stops; build proximity scoring (stops within 500m).
-- [ ] **Unified API:** Build `GET` endpoint to return all data for a clicked point.
+- [x] **Unified API:** Build `GET` endpoint to return all data for a clicked point.
+- [x] **Display Tract and Business:** Maplibre to display Source and Layer for Tract
 
 ---
 
