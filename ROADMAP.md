@@ -37,13 +37,13 @@
 
 **Goal:** A trained model that predicts location desirability.
 
-- [ ] **Data Prep:** Pull features for all Vancouver tracts; build proxy labels (density per capita).
-- [ ] **EDA:** Exploratory analysis with Polars to understand feature distributions.
-- [ ] **Experiment Tracking:** Set up **MLflow** to log training runs.
-- [ ] **Modeling:** Train **XGBoost Regressor** and evaluate with RMSE + R².
+- [x] **Data Prep:** Pull features for all Vancouver tracts; build proxy labels (density per capita).
+- [x] **EDA:** Exploratory analysis with Polars to understand feature distributions.
+- [x] **Experiment Tracking:** Set up **MLflow** to log training runs.
+- [x] **Modeling:** Train **XGBoost Regressor** and evaluate with RMSE + R².
 - [ ] **Inference API:** Load model in FastAPI; build `POST /score` endpoint.
-- [ ] **Clustering:** Add K-Means for neighborhood archetypes and Isolation Forest for gap detection.
-- [ ] **UI Upgrade:** Migrate to **MapLibre** for smoother 3D choropleth overlays (color by score).
+- [ ] **UI Feature:** Add popover for business when hover/click, Add popover for search pin to display scoring metrics, add tab at menu to display census data
+- [ ] **UI Upgrade:** Upgrade UI for Menu, BusinessLayer, TractLayer dynamic color based on score
 
 ---
 
@@ -62,6 +62,6 @@
 
 ## Technical Debt & Tooling
 
-- [ ] Add `DATABASE_URL` to `.env` (Use `sslmode=require`).
+- [x] Add `DATABASE_URL` to `.env` (Use `sslmode=require`).
 - [ ] Install dependencies: `uv add asyncpg psycopg2-binary geopandas`.
-- [ ] Configure `alembic.ini` to point to Neon.
+- [x] Configure `env.py` from alembic to point to Neon.

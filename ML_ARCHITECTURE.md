@@ -52,3 +52,10 @@ The system queries the database for the total number of existing businesses **al
 The final score is a normalized percentage of the "untapped" market within that neighborhood.
 
 $$Score = \max\left(0, \left( \frac{\text{Predicted Capacity} - \text{Actual Tract Supply}}{\text{Predicted Capacity}} \right) \times 100\right)$$
+
+---
+
+## 4. Future Enhancement
+
+- Include Transit Data
+- Include Zoning Data
