@@ -1,6 +1,7 @@
 from models.census import CensusTract, CensusDemographics
 from sqlmodel import Session, func, select
-from schema.response import CensusInfoResponse, CensusDemographicsBase
+from schema.response import CensusDemographicsBase
+from schema.geo_json import CensusFeature
 import json
 
 
@@ -16,7 +17,7 @@ class CensusService:
         )
         return self.session.scalar(statement)
 
-    def get_tract_details(self, tract_id: str) -> CensusInfoResponse | None:
+    def get_tract_details(self, tract_id: str) -> CensusFeature | None:
         stmt_tract = select(
             CensusTract,
             func.ST_AsGeoJSON(CensusTract.geom).label("geojson")
@@ -34,8 +35,8 @@ class CensusService:
         demo = self.session.exec(stmt_demo).first()
         demo = CensusDemographicsBase.model_validate(demo)
 
-        return CensusInfoResponse(
-            tract_id=tract.tract_id,
+        return CensusFeature(
             geometry=json.loads(geojson_str),
-            demographics=demo
+            properties=demo
         )
+
