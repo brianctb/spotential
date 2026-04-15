@@ -2,9 +2,9 @@
 
 import { Marker } from "react-map-gl/maplibre"
 import { useQuery } from "@tanstack/react-query";
-import { businessApi } from "@/api/business";
 import { useMapStore } from "@/store/mapStore";
 import { PinMarkerSrcProps } from "./PinMarker.type";
+import { analysisApi } from "@/api/analysis";
 
 export const BusinessMarkrs = ({
     src = "/map-pin.svg",
@@ -17,23 +17,23 @@ export const BusinessMarkrs = ({
     // data is cached from the sidebar component query
     // only retrieves from cache, does not make a new request
     const { data } = useQuery({
-        queryKey: ["businesses", selectedType, pinLocation?.lng, pinLocation?.lat],
+        queryKey: ["analysis", selectedType, pinLocation?.lng, pinLocation?.lat],
         queryFn: () =>
-            businessApi.getBusinesses(
-                selectedType!,
-                pinLocation!.lng,
-                pinLocation!.lat
-            ),
+            analysisApi.getAnalysis({
+                business_type: selectedType!,
+                lng: pinLocation!.lng,
+                lat: pinLocation!.lat
+            }),
         enabled: !!selectedType && !!pinLocation
     });
-    const businesses = data?.businesses;
+    const businesses = data?.businesses.features
 
     return (
         businesses?.map((business) => (
             <Marker
-                key={business.id}
-                longitude={business.lng}
-                latitude={business.lat}
+                key={business.properties.osm_id}
+                longitude={business.properties.lng}
+                latitude={business.properties.lat}
                 anchor="bottom"
             >
                 <img

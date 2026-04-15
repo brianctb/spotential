@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { businessApi } from "@/api/business";
+import { analysisApi } from "@/api/analysis";
 import {
     Sidebar,
     SidebarContent,
@@ -20,7 +21,8 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { BusinessCategoryResponse, BusinessesResponse, BusinessType } from "@/types/business";
+import { BusinessCategoryResponse, BusinessType } from "@/types/business";
+import { AnalysisData } from "@/types/analysis";
 import { useMapStore } from "@/store/mapStore";
 import { cn } from "@/lib/utils";
 
@@ -41,14 +43,14 @@ export function BusinessSidebar() {
         queryFn: businessApi.getMenu,
     });
 
-    const { isFetching } = useQuery<BusinessesResponse>({
-        queryKey: ["businesses", selectedType, searchPinLocation?.lng, searchPinLocation?.lat],
+    const { isFetching } = useQuery<AnalysisData>({
+        queryKey: ["analysis", selectedType, searchPinLocation?.lng, searchPinLocation?.lat],
         queryFn: () =>
-            businessApi.getBusinesses(
-                selectedType!,
-                searchPinLocation!.lng,
-                searchPinLocation!.lat
-            ),
+            analysisApi.getAnalysis({
+                business_type: selectedType!,
+                lng: searchPinLocation!.lng,
+                lat: searchPinLocation!.lat
+            }),
         enabled: !!selectedType && !!searchPinLocation
     });
 

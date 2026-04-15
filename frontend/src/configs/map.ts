@@ -15,7 +15,7 @@ export const MAP_CONFIG = {
 
     limits: {
         minZoom: 10,
-        maxZoom: 15,
+        maxZoom: 19,
     },
 
     style: "https://tiles.openfreemap.org/styles/liberty",
