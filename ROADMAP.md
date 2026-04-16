@@ -41,13 +41,21 @@
 - [x] **EDA:** Exploratory analysis with Polars to understand feature distributions.
 - [x] **Experiment Tracking:** Set up **MLflow** to log training runs.
 - [x] **Modeling:** Train **XGBoost Regressor** and evaluate with RMSE + R².
-- [ ] **Inference API:** Load model in FastAPI; build `POST /score` endpoint.
+- [x] **Inference API:** Load model in FastAPI; build scoring endpoint.
 - [ ] **UI Feature:** Add popover for business when hover/click, Add popover for search pin to display scoring metrics, add tab at menu to display census data
 - [ ] **UI Upgrade:** Upgrade UI for Menu, BusinessLayer, TractLayer dynamic color based on score
 
 ---
 
-## Phase 4: GenAI Layer & Production Polish
+## Phase 5: Deployment
+
+- [ ] **Docker:** Docker containerize app
+- [ ] **Deployment:** Frontend on Vercel, Backend on Fly.io, custom domain `spotential.dev`.
+- [ ] **Showcase:** Record demo video and create architecture diagrams for portfolio.
+
+---
+
+## Phase 6: GenAI Layer & Production Polish
 
 **Goal:** Natural language queries and professional deployment.
 
@@ -55,8 +63,6 @@
 - [ ] **RAG Pipeline:** Use **pgvector** in Neon to embed neighborhood context for grounded AI answers.
 - [ ] **UX Polish:** Add Recharts bar charts for score breakdowns; implement mobile-responsive layout.
 - [ ] **Reliability:** Complete **Pytest** coverage for backend and ML pipeline.
-- [ ] **Deployment:** Frontend on Vercel, Backend on Fly.io, custom domain `spotential.dev`.
-- [ ] **Showcase:** Record demo video and create architecture diagrams for portfolio.
 
 ---
 
