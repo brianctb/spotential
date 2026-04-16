@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { businessApi } from "@/api/business";
-import { analysisApi } from "@/api/analysis";
 import {
     Sidebar,
     SidebarContent,
@@ -22,18 +21,16 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { BusinessCategoryResponse, BusinessType } from "@/types/business";
-import { AnalysisData } from "@/types/analysis";
 import { useMapStore } from "@/store/mapStore";
+import { useAnalysisQuery } from "@/hooks/useAnalysisQuery";
 import { cn } from "@/lib/utils";
 
 export function BusinessSidebar() {
 
     // store states
-    const selectedType = useMapStore((state) => state.selectedType);
     const setSelectedType = useMapStore((state) => state.setSelectedType);
     const draftPinLocation = useMapStore((state) => state.draftPin);
     const setDraftPinLocation = useMapStore((state) => state.setDraftPin);
-    const searchPinLocation = useMapStore((state) => state.searchPin);
     const setSearchPinLocation = useMapStore((state) => state.setSearchPin);
     const [businessType, setBusinessType] = useState<BusinessType | null>(null);
 
@@ -41,19 +38,13 @@ export function BusinessSidebar() {
     const { data: menu, isLoading, isError } = useQuery<BusinessCategoryResponse[]>({
         queryKey: ["business-menu"],
         queryFn: businessApi.getMenu,
+        retry: 1,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        refetchOnMount: false,
     });
 
-    const { isFetching } = useQuery<AnalysisData>({
-        queryKey: ["analysis", selectedType, searchPinLocation?.lng, searchPinLocation?.lat],
-        queryFn: () =>
-            analysisApi.getAnalysis({
-                business_type: selectedType!,
-                lng: searchPinLocation!.lng,
-                lat: searchPinLocation!.lat
-            }),
-        enabled: !!selectedType && !!searchPinLocation
-    });
-
+    const { isFetching } = useAnalysisQuery();
 
     return (
         <Sidebar className="border-r">

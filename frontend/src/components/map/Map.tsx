@@ -8,10 +8,8 @@ import { useRef } from "react";
 import { MAP_CONFIG } from "@/configs/map";
 import { useMapStore } from "@/store/mapStore";
 import { TractLayer } from "./TractLayer";
-import { useQuery } from "@tanstack/react-query";
-import { analysisApi } from "@/api/analysis";
 import { BusinessLayer } from "./BusinessLayer";
-import { FeatureCollection } from "geojson";
+import { useAnalysisQuery } from "@/hooks/useAnalysisQuery";
 
 export const SpotentialMap = () => {
 
@@ -33,17 +31,8 @@ export const SpotentialMap = () => {
     const setDraftPinLocation = useMapStore((state) => state.setDraftPin);
     const draftPinLocation = useMapStore((state) => state.draftPin);
     const searchPinLocation = useMapStore((state) => state.searchPin);
-    const selectedType = useMapStore((state) => state.selectedType);
 
-    const { data: analysis } = useQuery({
-        queryKey: ["analysis", selectedType, searchPinLocation?.lng, searchPinLocation?.lat],
-        queryFn: () => analysisApi.getAnalysis({
-            lng: searchPinLocation!.lng,
-            lat: searchPinLocation!.lat,
-            business_type: selectedType!
-        }),
-        enabled: !!searchPinLocation && !!selectedType,
-    });
+    const { data: analysis } = useAnalysisQuery();
 
     return (
         <Map
