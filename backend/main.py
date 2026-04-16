@@ -5,13 +5,16 @@ from routers.business import router as business_router
 from routers.location import router as location_router
 from routers.census import router as census_router
 import httpx
+import joblib
 
 
 @asynccontextmanager
 async def lifespan(fastapi_app: FastAPI):
     http_client = httpx.AsyncClient()
     fastapi_app.state.http_client = http_client
+    fastapi_app.state.model = joblib.load("ml/models/unified_spotential_model.pkl")
     yield
+    del app.state.model
     await http_client.aclose()
 
 

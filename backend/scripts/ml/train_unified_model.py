@@ -1,6 +1,5 @@
 import polars as pl
 import xgboost as xgb
-from sklearn.model_selection import train_test_split
 import joblib
 import mlflow
 from config.business_type import BUSINESS_CONFIGS
@@ -9,8 +8,10 @@ from pathlib import Path
 from sqlmodel import select
 from models.business import Business
 from models.census import CensusDemographics
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error, mean_squared_log_error
 import numpy as np
+from schema.ml_model import ModelFeatures
+from sklearn.model_selection import KFold
 
 
 current_file = Path(__file__).resolve()
@@ -86,61 +87,73 @@ def prepare_data(db_engine):
 
 
 def train_unified_model(df: pl.DataFrame):
-    features = [
-        "population",
-        "population_density",
-        "median_household_income",
-        "pct_working_age",
-        "pct_highly_educated",
-        "avg_household_size",
-        "other_business_count",
-        "business_type_id"
-    ]
+    features = ModelFeatures.feature_columns()
     target = "target_count"
 
-    x = df.select(features).to_pandas()
-    y = df.select(target).to_pandas()
+    X = df.select(features).to_pandas()
+    y = df.select(target).to_pandas().values.ravel()
 
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+    kf = KFold(n_splits=5, shuffle=True, random_state=42)
 
-    # Shrink the gap between busy hubs and quiet neighborhoods
-    # Without Log, a miss of 10 in downtown is a disaster. A miss of 1 in a suburb is nothing
-    y_train_log = np.log1p(y_train)
-    y_test_log = np.log1p(y_test)
+    mae_scores = []
+    rmsle_scores = []
 
-    with mlflow.start_run(run_name="unified_xgb_regressor"):
-        params = {
-            "n_estimators": 2000,
-            "learning_rate": 0.05,
-            "max_depth": 7,
-            "subsample": 0.7,
-            "random_state": 42
-        }
+    params = {
+        "n_estimators": 1000,
+        "learning_rate": 0.05,
+        "max_depth": 4,
+        "random_state": 42,
+        "subsample": 0.7,
+        "colsample_bytree": 0.7,
+        "objective": "count:poisson",
+    }
+
+    for fold, (train_idx, val_idx) in enumerate(kf.split(X, y)):
+        x_train, x_val = X.iloc[train_idx], X.iloc[val_idx]
+        y_train, y_val = y[train_idx], y[val_idx]
+
+        with mlflow.start_run(run_name=f"fold_{fold + 1}", nested=True):
+            model = xgb.XGBRegressor(**params)
+
+            model.fit(
+                x_train, y_train,
+                eval_set=[(x_val, y_val)],
+                verbose=False,
+            )
+
+            y_pred = model.predict(x_val)
+            f_mae = mean_absolute_error(y_val, y_pred)
+            f_rmsle = np.sqrt(mean_squared_log_error(y_val, y_pred))
+
+            mae_scores.append(f_mae)
+            rmsle_scores.append(f_rmsle)
+
+            print(f"Fold {fold + 1} | MAE: {f_mae:.4f} | RMSLE: {f_rmsle:.4f}")
+
+    with mlflow.start_run(run_name="unified_kfold_summary"):
+        avg_mae = np.mean(mae_scores)
+        std_mae = np.std(mae_scores)
+
+        avg_rmsle = np.mean(rmsle_scores)
+        std_rmsle = np.std(rmsle_scores)
+
         mlflow.log_params(params)
+        mlflow.log_metric("avg_mae", float(avg_mae))
+        mlflow.log_metric("std_mae", float(std_mae))
+        mlflow.log_metric("avg_rmsle", float(avg_rmsle))
+        mlflow.log_metric("std_rmsle", float(std_rmsle))
 
-        model = xgb.XGBRegressor(**params)
-        print("Training model")
-        model.fit(
-            x_train, y_train_log,
-            eval_set=[(x_test, y_test_log)],
-            verbose=False
-        )
+        print(f"Final K-Fold Results:")
+        print(f"Average MAE: {avg_mae:.4f} (+/- {std_mae:.4f})")
+        print(f"Average RMSLE: {avg_rmsle:.4f} (+/- {std_rmsle:.4f})")
 
-        y_pred_log = model.predict(x_test)
-        y_pred = np.expm1(y_pred_log)
+        final_model = xgb.XGBRegressor(**params)
+        final_model.fit(X, y,)
 
-        # Log Metrics
-        score = model.score(x_test, y_test_log)
-        mae = mean_absolute_error(y_test, y_pred)
-        mlflow.log_metric("mae", mae)
-        mlflow.log_metric("r2_score", score)
-        print(f"Training Complete. R² Score: {score:.4f}")
-        print(f"MAE: {mae:.2f} businesses")
+        joblib.dump(final_model, model_path)
+        mlflow.log_artifact(str(model_path))
 
-        joblib.dump(model, model_path)
-        mlflow.log_artifact(f"{model_path}")
-
-        return model
+        return final_model
 
 
 if __name__ == "__main__":
