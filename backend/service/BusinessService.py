@@ -1,8 +1,8 @@
 from config.business_type import BusinessType
 from models.business import Business, BusinessBase
-from schema.geo_json import Geometry, BusinessFeature, BusinessCollection
 from sqlmodel import Session, func, select
 from typing import Optional
+from schema.business import BusinessWithGeometry
 import json
 
 
@@ -14,7 +14,7 @@ class BusinessService:
             self,
             tract_id: str,
             business_type: Optional[BusinessType] = None
-    ) -> BusinessCollection:
+    ) -> list[BusinessWithGeometry]:
 
         stmt = (
             select(
@@ -29,19 +29,25 @@ class BusinessService:
 
         results = self.session.exec(stmt).all()
 
-        features = []
+        businesses = []
 
         for business_obj, geojson_str in results:
-            props = BusinessBase.model_validate(business_obj)
+            business = BusinessBase.model_validate(business_obj)
             geom = json.loads(geojson_str)
 
-            features.append(
-                BusinessFeature(
-                    properties=props,
-                    geometry=Geometry(**geom)
+            businesses.append(
+                BusinessWithGeometry(
+                    business = business,
+                    geometry = geom
                 )
             )
 
-        return BusinessCollection(features=features)
+        return businesses
 
+    def get_total_biz_count_in_tract(self, tract_id: str) -> int:
+        stmt = select(func.count(Business.id)).where(
+            Business.tract_id == tract_id
+        )
 
+        count = self.session.exec(stmt).one()
+        return count

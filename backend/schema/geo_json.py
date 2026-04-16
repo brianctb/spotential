@@ -14,8 +14,22 @@ class FeatureBase(BaseModel):
 class CensusFeature(FeatureBase):
     properties: CensusDemographicsBase
 
+    @staticmethod
+    def to_feature(props: CensusDemographicsBase, geom: dict):
+        return CensusFeature(
+            properties=props,
+            geometry=Geometry(**geom),
+        )
+
 class BusinessFeature(FeatureBase):
     properties: BusinessBase
+
+    @staticmethod
+    def to_feature(props: BusinessBase, geom: dict):
+        return BusinessFeature(
+            properties=props,
+            geometry=Geometry(**geom),
+        )
 
 class BusinessCollection(BaseModel):
     type: Literal["FeatureCollection"] = "FeatureCollection"
