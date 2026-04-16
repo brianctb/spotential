@@ -19,5 +19,6 @@ export function useAnalysisQuery() {
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
         refetchOnMount: false,
+        retry: false,
     });
 }
