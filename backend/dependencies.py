@@ -8,10 +8,11 @@ from config.osm import OVERPASS_URL
 from sqlmodel import Session
 from db import engine
 from typing import Generator
+import xgboost as xgb
 
 
 def get_http_client(request: Request) -> httpx.AsyncClient:
-    return request.app.state.http_client
+    return request.app.state.http_clientxx
 
 
 def get_db_session() -> Generator[Session, None, None]:
@@ -30,9 +31,12 @@ def get_census_service(session: Session = Depends(get_db_session)) -> CensusServ
 def get_business_service(session: Session = Depends(get_db_session)) -> BusinessService:
     return BusinessService(session=session)
 
+def get_ml_model(request: Request) -> xgb.XGBRegressor:
+    return request.app.state.model
 
 def get_analysis_service(
         business_service: BusinessService=Depends(get_business_service),
         census_service: CensusService=Depends(get_census_service),
+        model: xgb.XGBRegressor=Depends(get_ml_model),
 ) -> AnalysisService:
-    return AnalysisService(business_service, census_service)
+    return AnalysisService(business_service, census_service, model)

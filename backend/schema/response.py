@@ -27,3 +27,7 @@ class CensusInfoResponse(BaseModel):
 class AnalysisResponse(BaseModel):
     census: CensusFeature
     businesses: BusinessCollection
+    score: float
+    businesses_in_tract: int
+    predicted_count: float
+    actual_count: int
