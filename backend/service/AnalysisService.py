@@ -1,13 +1,12 @@
-from schema.geo_json import CensusFeature
 from service.CensusService import CensusService
 from service.BusinessService import BusinessService
 from config.business_type import BusinessType
-from schema.response import AnalysisResponse
+from schema.response import AnalysisResponse, TractStats
 from xgboost import XGBRegressor
 from schema.ml_model import ModelFeatures
 from config.business_type import BUSINESS_CONFIGS
 import math
-from schema.geo_json import BusinessFeature, BusinessCollection
+from schema.geo_json import BusinessFeature, BusinessCollection, TractFeature, TractFeatureProps, Geometry
 import pandas as pd
 
 class AnalysisService:
@@ -35,8 +34,6 @@ class AnalysisService:
     def score_tract(actual: int, predicted: float) -> float:
         # sigmoid function for scoring
         ratio = math.log1p(predicted) - math.log1p(actual)
-        ratio = ratio / (abs(ratio) + 1)
-
         k = 5
         return 100 / (1 + math.exp(-k * ratio))
 
@@ -73,10 +70,16 @@ class AnalysisService:
 
         return AnalysisResponse(
             # Converting census and businesses data to GeoJson
-            census=CensusFeature.to_feature(census_demo, census_geom),
+            tract=TractFeature(
+                properties=TractFeatureProps(tract_id=tract_id, score=score),
+                geometry=Geometry(**census_geom)
+            ),
             businesses=BusinessCollection(features=business_features),
-            businesses_in_tract=total_biz_count,
-            actual_count=actual_count,
-            predicted_count=prediction,
-            score=score,
+            tract_stats=TractStats(
+                tract_id=tract_id,
+                score=score,
+                business_in_tract=total_biz_count,
+                predicted_count=prediction,
+                actual_count=actual_count,
+            )
         )

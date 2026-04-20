@@ -3,7 +3,7 @@ from models.business import BusinessBase
 from schema.business import Business
 from models.census import CensusDemographicsBase
 from typing import Any
-from schema.geo_json import BusinessCollection, CensusFeature
+from schema.geo_json import BusinessCollection, TractFeature
 
 
 class BusinessTypeResponse(BaseModel):
@@ -24,10 +24,14 @@ class CensusInfoResponse(BaseModel):
     demographics: CensusDemographicsBase
     geometry: dict[str, Any]
 
-class AnalysisResponse(BaseModel):
-    census: CensusFeature
-    businesses: BusinessCollection
+class TractStats(BaseModel):
+    tract_id: str
     score: float
-    businesses_in_tract: int
+    business_in_tract: int
     predicted_count: float
     actual_count: int
+
+class AnalysisResponse(BaseModel):
+    tract: TractFeature
+    businesses: BusinessCollection
+    tract_stats: TractStats

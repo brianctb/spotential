@@ -11,15 +11,12 @@ class FeatureBase(BaseModel):
     type: Literal["Feature"] = "Feature"
     geometry: Geometry
 
-class CensusFeature(FeatureBase):
-    properties: CensusDemographicsBase
+class TractFeatureProps(BaseModel):
+    tract_id: str
+    score: float
 
-    @staticmethod
-    def to_feature(props: CensusDemographicsBase, geom: dict):
-        return CensusFeature(
-            properties=props,
-            geometry=Geometry(**geom),
-        )
+class TractFeature(FeatureBase):
+    properties: TractFeatureProps
 
 class BusinessFeature(FeatureBase):
     properties: BusinessBase
