@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter, useSearchParams } from "next/navigation";
 import { businessApi } from "@/api/business";
 import {
     Sidebar,
@@ -23,28 +24,41 @@ import { Button } from "@/components/ui/button";
 import { BusinessCategoryResponse, BusinessType } from "@/types/business";
 import { useMapStore } from "@/store/mapStore";
 import { useAnalysisQuery } from "@/hooks/useAnalysisQuery";
-import { cn } from "@/lib/utils";
 
 export function BusinessSidebar() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
-    // store states
-    const setSelectedType = useMapStore((state) => state.setSelectedType);
     const draftPinLocation = useMapStore((state) => state.draftPin);
     const setDraftPinLocation = useMapStore((state) => state.setDraftPin);
-    const setSearchPinLocation = useMapStore((state) => state.setSearchPin);
-    const [businessType, setBusinessType] = useState<BusinessType | null>(null);
 
-    // fetching
-    const { data: menu, isLoading, isError } = useQuery<BusinessCategoryResponse[]>({
+    const [businessType, setBusinessType] = useState<BusinessType | null>(
+        (searchParams.get("business_type") as BusinessType) || null
+    );
+
+    const { data: menu } = useQuery<BusinessCategoryResponse[]>({
         queryKey: ["business-menu"],
         queryFn: businessApi.getMenu,
-        retry: 1,
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: false,
-        refetchOnMount: false,
+        staleTime: Infinity,
     });
 
     const { isFetching } = useAnalysisQuery();
+
+    const handleSpotentiate = () => {
+        if (!businessType || !draftPinLocation) return;
+
+        // Create the new URL with params
+        const params = new URLSearchParams();
+        params.set("business_type", businessType);
+        params.set("lat", draftPinLocation.lat.toString());
+        params.set("lng", draftPinLocation.lng.toString());
+
+        // Update the browser URL
+        router.push(`?${params.toString()}`);
+
+        // Clear the draft pin from the map
+        setDraftPinLocation(null);
+    };
 
     return (
         <Sidebar className="border-r">
@@ -59,33 +73,22 @@ export function BusinessSidebar() {
 
                 <Accordion type="multiple" className="w-full">
                     {menu?.map((category) => (
-                        // each category is a group
                         <SidebarGroup key={category?.key}>
                             <AccordionItem value={category.key}>
                                 <AccordionTrigger>
-                                    <SidebarGroupLabel>
-                                        {category.label}
-                                    </SidebarGroupLabel>
+                                    <SidebarGroupLabel>{category.label}</SidebarGroupLabel>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <SidebarGroupContent>
                                         <RadioGroup
-                                            value={businessType}
+                                            value={businessType || ""}
                                             onValueChange={(value) => setBusinessType(value as BusinessType)}
                                             className="space-y-1"
                                         >
                                             {category.business.map((business) => (
-                                                <div
-                                                    key={business.key}
-                                                    className="flex items-center space-x-2"
-                                                >
-                                                    <RadioGroupItem
-                                                        value={business.key}
-                                                        id={business.key}
-                                                    />
-                                                    <Label htmlFor={business.key}>
-                                                        {business.label}
-                                                    </Label>
+                                                <div key={business.key} className="flex items-center space-x-2">
+                                                    <RadioGroupItem value={business.key} id={business.key} />
+                                                    <Label htmlFor={business.key}>{business.label}</Label>
                                                 </div>
                                             ))}
                                         </RadioGroup>
@@ -95,17 +98,14 @@ export function BusinessSidebar() {
                         </SidebarGroup>
                     ))}
                 </Accordion>
+
                 <div className="mt-4 flex justify-center">
                     <Button
                         className="w-40"
                         disabled={!businessType || !draftPinLocation || isFetching}
-                        onClick={() => {
-                            setSelectedType(businessType);
-                            setSearchPinLocation(draftPinLocation);
-                            setDraftPinLocation(null);
-                        }}
+                        onClick={handleSpotentiate}
                     >
-                        Spotentiate
+                        {isFetching ? "Analyzing..." : "Spotentiate"}
                     </Button>
                 </div>
             </SidebarContent>
