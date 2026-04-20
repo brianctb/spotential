@@ -68,7 +68,7 @@ export const SpotentialMap = () => {
 
             {analysis && (
                 <>
-                    <TractLayer data={analysis.census} />
+                    <TractLayer data={analysis.tract} />
                     <BusinessLayer data={analysis.businesses} />
                 </>
             )}

@@ -146,8 +146,9 @@ export interface components {
     schemas: {
         /** AnalysisResponse */
         AnalysisResponse: {
-            census: components["schemas"]["CensusFeature"];
+            tract: components["schemas"]["TractFeature"];
             businesses: components["schemas"]["BusinessCollection"];
+            tract_stats: components["schemas"]["TractStats"];
         };
         /** Business */
         Business: {
@@ -261,17 +262,6 @@ export interface components {
             /** Avg Household Size */
             avg_household_size?: number | null;
         };
-        /** CensusFeature */
-        CensusFeature: {
-            /**
-             * Type
-             * @default Feature
-             * @constant
-             */
-            type: "Feature";
-            geometry: components["schemas"]["Geometry"];
-            properties: components["schemas"]["CensusDemographicsBase"];
-        };
         /** CensusInfoResponse */
         CensusInfoResponse: {
             /** Tract Id */
@@ -296,6 +286,37 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** TractFeature */
+        TractFeature: {
+            /**
+             * Type
+             * @default Feature
+             * @constant
+             */
+            type: "Feature";
+            geometry: components["schemas"]["Geometry"];
+            properties: components["schemas"]["TractFeatureProps"];
+        };
+        /** TractFeatureProps */
+        TractFeatureProps: {
+            /** Tract Id */
+            tract_id: string;
+            /** Score */
+            score: number;
+        };
+        /** TractStats */
+        TractStats: {
+            /** Tract Id */
+            tract_id: string;
+            /** Score */
+            score: number;
+            /** Business In Tract */
+            business_in_tract: number;
+            /** Predicted Count */
+            predicted_count: number;
+            /** Actual Count */
+            actual_count: number;
         };
         /** ValidationError */
         ValidationError: {

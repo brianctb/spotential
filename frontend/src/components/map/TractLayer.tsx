@@ -1,28 +1,45 @@
 import { Source, Layer } from "react-map-gl/maplibre";
 import type { LayerProps } from "react-map-gl/maplibre";
-import type { CensusFeature } from "@/types/census";
+import { ExpressionSpecification } from "maplibre-gl";
+import type { TractFeature } from "@/types/tract";
 import { Feature } from 'geojson';
 
 interface TractLayerProps {
-    data: CensusFeature;
+    data: TractFeature;
     id?: string;
-    color?: string;
     opacity?: number;
 }
 
 export const TractLayer = ({
     data,
     id = "selected-tract",
-    color = "#0c9f20",
-    opacity = 0.25
+    opacity = 0.4
 }: TractLayerProps) => {
     if (!data) return null;
+
+    const scoreColor: ExpressionSpecification = [
+        "interpolate",
+        ["linear"],
+        ["get", "score"],
+        0, "#ff0000",
+        50, "#d9cf14",
+        100, "#08c958"
+    ];
+
+    const lineColor: ExpressionSpecification = [
+        "interpolate",
+        ["linear"],
+        ["get", "score"],
+        0, "#d80404",
+        50, "#9e982c",
+        100, "#067a3a"
+    ];
 
     const fillLayer: LayerProps = {
         id: `${id}-fill`,
         type: "fill",
         paint: {
-            "fill-color": color,
+            "fill-color": scoreColor,
             "fill-opacity": opacity,
         },
     };
@@ -31,7 +48,7 @@ export const TractLayer = ({
         id: `${id}-outline`,
         type: "line",
         paint: {
-            "line-color": color,
+            "line-color": lineColor,
             "line-width": 2,
         },
     };
