@@ -1,24 +1,28 @@
 "use client";
 
-import { Marker } from "react-map-gl/maplibre"
-import { PinMarkerProps } from "./PinMarker.type";
+import { forwardRef } from "react";
+import { Marker } from "react-map-gl/maplibre";
+import { PinMarkerProps } from "@/types/PinMarker.type";
 
-export const PinMarker = ({
+export const PinMarker = forwardRef<HTMLImageElement, PinMarkerProps>(({
     lng,
     lat,
     src = "/map-pin.svg",
     alt = "map pin",
     className = "w-9 h-9",
     onClick,
-}: PinMarkerProps) => {
+    ...props
+}, ref) => {
     return (
         <Marker longitude={lng} latitude={lat} anchor="bottom">
             <img
+                ref={ref}
                 src={src}
                 alt={alt}
+                className={className}
                 onClick={onClick}
-                className={`${className} ${onClick ? "cursor-pointer" : "cursor-default"}`}
+                {...props}
             />
         </Marker>
-    );
-};
+    )
+});

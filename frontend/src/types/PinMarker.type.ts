@@ -1,7 +1,7 @@
 export interface PinMarkerProps extends PinMarkerSrcProps {
     lng: number;
     lat: number;
-    onClick?: () => void;
+    onClick?: (e: React.MouseEvent<HTMLImageElement>) => void;
 }
 
 export interface PinMarkerSrcProps {

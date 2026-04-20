@@ -10,6 +10,7 @@ import { TractLayer } from "./TractLayer";
 import { BusinessLayer } from "./BusinessLayer";
 import { useAnalysisQuery } from "@/hooks/useAnalysisQuery";
 import { useSearchParams } from "next/dist/client/components/navigation";
+import { SearchPin } from "./PinMarker/SearchPin";
 
 export const SpotentialMap = () => {
     const searchParams = useSearchParams();
@@ -25,7 +26,6 @@ export const SpotentialMap = () => {
         try {
             const response = await map.loadImage("/business-marker.png");
             map.addImage("business-marker", response.data);
-            console.log("Marker loaded successfully");
         } catch (error) {
             console.error("Failed to load map icon:", error);
         }
@@ -41,7 +41,7 @@ export const SpotentialMap = () => {
             ref={mapRef}
             initialViewState={MAP_CONFIG.vancouver.center}
             style={{ width: "100%", height: "100%" }}
-            mapStyle="https://tiles.openfreemap.org/styles/liberty"
+            mapStyle={MAP_CONFIG.mapStyle}
             maxBounds={MAP_CONFIG.vancouver.bounds}
             minZoom={MAP_CONFIG.limits.minZoom}
             maxZoom={MAP_CONFIG.limits.maxZoom}
@@ -59,8 +59,8 @@ export const SpotentialMap = () => {
                 />
             )}
 
-            {searchLat && searchLng && (
-                <PinMarker
+            {searchLat && searchLng && analysis && (
+                <SearchPin
                     lng={searchLng}
                     lat={searchLat}
                 />

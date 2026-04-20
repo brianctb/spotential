@@ -1,4 +1,5 @@
 export const MAP_CONFIG = {
+    mapStyle: "https://tiles.openfreemap.org/styles/liberty",
     vancouver: {
         bounds: [
             [-123.30, 49.10],
