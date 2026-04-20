@@ -3,18 +3,21 @@
 import Map, { NavigationControl } from "react-map-gl/maplibre";
 import type { MapRef } from "react-map-gl/maplibre";
 import { PinMarker } from "@/components/map/PinMarker/PinMarker";
-import { BusinessMarkrs } from "@/components/map/PinMarker/BusinessMarkers";
 import { useRef } from "react";
 import { MAP_CONFIG } from "@/configs/map";
 import { useMapStore } from "@/store/mapStore";
 import { TractLayer } from "./TractLayer";
 import { BusinessLayer } from "./BusinessLayer";
 import { useAnalysisQuery } from "@/hooks/useAnalysisQuery";
+import { useSearchParams } from "next/dist/client/components/navigation";
 
 export const SpotentialMap = () => {
+    const searchParams = useSearchParams();
 
     // map setup
     const mapRef = useRef<MapRef>(null);
+    const searchLat = Number(searchParams.get("lat"));
+    const searchLng = Number(searchParams.get("lng"));
     const onMapLoad = async () => {
         const map = mapRef.current?.getMap();
         if (!map) return;
@@ -30,7 +33,6 @@ export const SpotentialMap = () => {
 
     const setDraftPinLocation = useMapStore((state) => state.setDraftPin);
     const draftPinLocation = useMapStore((state) => state.draftPin);
-    const searchPinLocation = useMapStore((state) => state.searchPin);
 
     const { data: analysis } = useAnalysisQuery();
 
@@ -57,10 +59,10 @@ export const SpotentialMap = () => {
                 />
             )}
 
-            {searchPinLocation && (
+            {searchLat && searchLng && (
                 <PinMarker
-                    lng={searchPinLocation.lng}
-                    lat={searchPinLocation.lat}
+                    lng={searchLng}
+                    lat={searchLat}
                 />
             )}
 
@@ -70,8 +72,6 @@ export const SpotentialMap = () => {
                     <BusinessLayer data={analysis.businesses} />
                 </>
             )}
-
-            {/* <BusinessMarkrs /> */}
         </Map>
     );
 }

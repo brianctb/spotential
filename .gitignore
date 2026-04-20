@@ -19,12 +19,12 @@ frontend/.turbo/
 # ML artifacts — too large for git
 backend/ml_models/
 backend/data/
-backend/ml/models
-backend/ml/mlruns
+backend/mlruns
 
 # OS files
 .DS_Store
 Thumbs.db
+**.db
 
 # IDE
 .vscode/

@@ -1,10 +1,8 @@
 import polars as pl
 import xgboost as xgb
-import joblib
 import mlflow
 from config.business_type import BUSINESS_CONFIGS
 from db import engine
-from pathlib import Path
 from sqlmodel import select
 from models.business import Business
 from models.census import CensusDemographics
@@ -12,27 +10,16 @@ from sklearn.metrics import mean_absolute_error, mean_squared_log_error
 import numpy as np
 from schema.ml_model import ModelFeatures
 from sklearn.model_selection import KFold
-
-
-current_file = Path(__file__).resolve()
-backend_root = current_file.parents[2]
-ml_dir = backend_root /"ml"
-tracking_uri = ml_dir / "mlruns"
-model_dir = ml_dir/"models"
-model_dir.mkdir(parents=True, exist_ok=True)
-model_name = "unified_spotential_model.pkl"
-model_path = model_dir / model_name
+from config.mlflow_config import init_mlflow
+from datetime import datetime
 
 pl.Config.set_tbl_cols(-1)
 pl.Config.set_tbl_width_chars(200)
 
-mlflow.set_tracking_uri(tracking_uri)
-mlflow.set_experiment("spotential_v1")
+run_name = f"Unified_Model_{datetime.now().strftime('%m%d_%H%M')}"
 
 
 def prepare_data(db_engine):
-
-    # Pulling raw tables via SQLModel/Engine
     tracts_query = select(CensusDemographics)
     biz_query = select(Business)
 
@@ -93,69 +80,66 @@ def train_unified_model(df: pl.DataFrame):
     X = df.select(features).to_pandas()
     y = df.select(target).to_pandas().values.ravel()
 
-    kf = KFold(n_splits=5, shuffle=True, random_state=42)
-
-    mae_scores = []
-    rmsle_scores = []
-
     params = {
-        "n_estimators": 1000,
-        "learning_rate": 0.05,
-        "max_depth": 4,
+        "n_estimators": 2000,
+        "learning_rate": 0.04,
+        "max_depth": 5,
         "random_state": 42,
         "subsample": 0.7,
         "colsample_bytree": 0.7,
         "objective": "count:poisson",
     }
 
-    for fold, (train_idx, val_idx) in enumerate(kf.split(X, y)):
-        x_train, x_val = X.iloc[train_idx], X.iloc[val_idx]
-        y_train, y_val = y[train_idx], y[val_idx]
-
-        with mlflow.start_run(run_name=f"fold_{fold + 1}", nested=True):
-            model = xgb.XGBRegressor(**params)
-
-            model.fit(
-                x_train, y_train,
-                eval_set=[(x_val, y_val)],
-                verbose=False,
-            )
-
-            y_pred = model.predict(x_val)
-            f_mae = mean_absolute_error(y_val, y_pred)
-            f_rmsle = np.sqrt(mean_squared_log_error(y_val, y_pred))
-
-            mae_scores.append(f_mae)
-            rmsle_scores.append(f_rmsle)
-
-            print(f"Fold {fold + 1} | MAE: {f_mae:.4f} | RMSLE: {f_rmsle:.4f}")
-
-    with mlflow.start_run(run_name="unified_kfold_summary"):
-        avg_mae = np.mean(mae_scores)
-        std_mae = np.std(mae_scores)
-
-        avg_rmsle = np.mean(rmsle_scores)
-        std_rmsle = np.std(rmsle_scores)
-
+    with mlflow.start_run(run_name=run_name) as parent_run:
         mlflow.log_params(params)
-        mlflow.log_metric("avg_mae", float(avg_mae))
-        mlflow.log_metric("std_mae", float(std_mae))
-        mlflow.log_metric("avg_rmsle", float(avg_rmsle))
-        mlflow.log_metric("std_rmsle", float(std_rmsle))
 
-        print(f"Final K-Fold Results:")
-        print(f"Average MAE: {avg_mae:.4f} (+/- {std_mae:.4f})")
-        print(f"Average RMSLE: {avg_rmsle:.4f} (+/- {std_rmsle:.4f})")
+        kf = KFold(n_splits=5, shuffle=True, random_state=42)
+        mae_scores = []
+        rmsle_scores = []
+
+        for fold, (train_idx, val_idx) in enumerate(kf.split(X, y)):
+            x_train, x_val = X.iloc[train_idx], X.iloc[val_idx]
+            y_train, y_val = y[train_idx], y[val_idx]
+
+            with mlflow.start_run(run_name=f"fold_{fold + 1}", nested=True):
+                model = xgb.XGBRegressor(**params)
+                model.fit(
+                    x_train, y_train,
+                    eval_set=[(x_val, y_val)],
+                    verbose=False
+                )
+
+                y_pred = model.predict(x_val)
+                y_pred_clipped = np.maximum(y_pred, 0)
+
+                f_mae = mean_absolute_error(y_val, y_pred)
+                f_rmsle = np.sqrt(mean_squared_log_error(y_val, y_pred_clipped))
+
+                mae_scores.append(f_mae)
+                rmsle_scores.append(f_rmsle)
+
+                mlflow.log_metric("mae", f_mae)
+                mlflow.log_metric("rmsle", f_rmsle)
+                print(f"Fold {fold + 1} | MAE: {f_mae:.4f}")
+
+        avg_mae = np.mean(mae_scores)
+        avg_rmsle = np.mean(rmsle_scores)
+
+        mlflow.log_metric("avg_mae", float(avg_mae))
+        mlflow.log_metric("std_mae", float(np.std(mae_scores)))
+        mlflow.log_metric("avg_rmsle", float(avg_rmsle))
+        mlflow.log_metric("std_rmsle", float(np.std(rmsle_scores)))
+
+        print(f"\nFinal CV Results: MAE {avg_mae:.4f}")
 
         final_model = xgb.XGBRegressor(**params)
-        final_model.fit(X, y,)
+        final_model.fit(X, y)
 
-        joblib.dump(final_model, model_path)
-        mlflow.log_artifact(str(model_path))
-
+        mlflow.xgboost.log_model(final_model, name="model")
         return final_model
 
 
 if __name__ == "__main__":
+    init_mlflow()
     processed_df = prepare_data(engine)
     train_unified_model(processed_df)
