@@ -36,7 +36,8 @@ export const BusinessLayer = ({ data }: { data: BusinessCollection; }) => {
         paint: {
             "circle-color": "#51bbd6",
             // step logic: [default_radius, threshold, new_radius, threshold, new_radius]
-            "circle-radius": ["step", ["get", "point_count"], 20, 100, 30, 750, 40]
+            "circle-radius": ["step", ["get", "point_count"], 20, 100, 30, 750, 40],
+            "circle-opacity": 0.8
         }
     };
 
