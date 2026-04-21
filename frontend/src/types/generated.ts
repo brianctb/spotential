@@ -149,6 +149,7 @@ export interface components {
             tract: components["schemas"]["TractFeature"];
             businesses: components["schemas"]["BusinessCollection"];
             tract_stats: components["schemas"]["TractStats"];
+            demographics: components["schemas"]["CensusDemographicsBase"];
         };
         /** Business */
         Business: {
