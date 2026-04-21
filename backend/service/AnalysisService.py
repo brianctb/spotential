@@ -81,5 +81,6 @@ class AnalysisService:
                 business_in_tract=total_biz_count,
                 predicted_count=prediction,
                 actual_count=actual_count,
-            )
+            ),
+            demographics=census_demo
         )

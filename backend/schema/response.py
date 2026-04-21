@@ -1,10 +1,8 @@
 from pydantic import BaseModel
-from models.business import BusinessBase
 from schema.business import Business
 from models.census import CensusDemographicsBase
 from typing import Any
 from schema.geo_json import BusinessCollection, TractFeature
-
 
 class BusinessTypeResponse(BaseModel):
     key: str
@@ -35,3 +33,4 @@ class AnalysisResponse(BaseModel):
     tract: TractFeature
     businesses: BusinessCollection
     tract_stats: TractStats
+    demographics: CensusDemographicsBase

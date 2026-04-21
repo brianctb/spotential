@@ -35,4 +35,3 @@ class CensusService:
         demo = CensusDemographicsBase.model_validate(demo)
 
         return demo, json.loads(geojson_str)
-

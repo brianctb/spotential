@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from typing import Any, List, Literal
-from models.census import CensusDemographicsBase
 from models.business import BusinessBase
 
 class Geometry(BaseModel):
