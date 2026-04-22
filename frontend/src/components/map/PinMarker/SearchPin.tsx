@@ -28,7 +28,8 @@ export const SearchPin = ({ lat, lng }: SearchPinProps) => {
                 <PinMarker
                     lng={lng}
                     lat={lat}
-                    className="w-9 h-9 transition-transform hover:scale-150 cursor-pointer"
+                    className="w-20 h-20 transition-transform hover:scale-150 cursor-pointer"
+                    src={"/search-pin.png"}
                     onClick={(e) => {
                         e.stopPropagation();
                         setOpen(true);

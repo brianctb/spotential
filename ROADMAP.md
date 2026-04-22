@@ -47,7 +47,7 @@
 - [x] **UI Feature:** Redirect to the tract and proper zoom after fetching
 - [ ] **UI Upgrade:** Upgrade UI for Menu, Demographics
 - [ ] **UI Upgrade:** Add animation for fetching, and delay, find new Search Pin svg
-- [ ] **UI Feature:** Add disable Tooltip
+- [ ] **UI Feature:** Add disable Tooltip and error sonner
 - [ ] **UI Feature:** Add Dark Mode and mode trigger
 
 ---

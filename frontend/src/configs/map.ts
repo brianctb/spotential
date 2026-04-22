@@ -1,5 +1,7 @@
 export const MAP_CONFIG = {
     mapStyle: "https://tiles.openfreemap.org/styles/liberty",
+    // Dark mode option (currently unused, but can be switched to for a different aesthetic)
+    // mapStyle: "https://tiles.stadiamaps.com/styles/alidade_smooth_dark.json",
     vancouver: {
         bounds: [
             [-123.30, 49.10],
@@ -18,8 +20,6 @@ export const MAP_CONFIG = {
         minZoom: 10,
         maxZoom: 19,
     },
-
-    style: "https://tiles.openfreemap.org/styles/liberty",
 
     bizSymbolLayerId: "business-symbols"
 };
