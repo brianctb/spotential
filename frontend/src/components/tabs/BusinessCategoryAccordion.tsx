@@ -14,6 +14,7 @@ import { useMapStore } from "@/store/mapStore";
 import { useState } from "react";
 import { useAnalysisQuery } from "@/hooks/useAnalysisQuery";
 import { Button } from "../ui/button";
+import { useMenuQuery } from "@/hooks/useMenuQuery";
 
 
 export const BusinessCategoryAccordion = () => {
@@ -27,12 +28,7 @@ export const BusinessCategoryAccordion = () => {
         (searchParams.get("business_type") as BusinessType) || null
     );
 
-    const { data: menu, isLoading } = useQuery<BusinessCategoryResponse[]>({
-        queryKey: ["business-menu"],
-        queryFn: businessApi.getMenu,
-        staleTime: Infinity,
-    });
-
+    const { data: menu, isLoading } = useMenuQuery();
     const { isFetching } = useAnalysisQuery();
 
     const handleSpotentiate = () => {
