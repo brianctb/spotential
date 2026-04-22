@@ -5,13 +5,13 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
-import { Landmark, Users, GraduationCap, Sparkle, Star } from "lucide-react";
+import { Landmark, Users, GraduationCap, Sparkle } from "lucide-react";
 import { useAnalysisQuery } from "@/hooks/useAnalysisQuery";
 
 const StatCard = ({ label, value }: { label: string; value: string | number | undefined | null }) => (
     <Card className="shadow-md m-0.5 py-0.75 px-0">
         <CardContent>
-            <p className="text-[11px] uppercase font-bold text-muted-foreground">{label}</p>
+            <p className="text-[11px] min-h-8 uppercase font-bold text-muted-foreground">{label}</p>
             <p className="text-[14px] font-bold tabular-nums">{value || '-'}</p>
         </CardContent>
     </Card>
@@ -55,7 +55,7 @@ export const DemographicsAccordion = () => {
             <StatCard label="Total Population" value={demographics?.population} />
             <div className="grid grid-cols-2 gap-1">
                 <StatCard label="Density" value={demographics?.population_density?.toFixed(0)} />
-                <StatCard label="Age 15-64" value={demographics?.count_age_15_64} />
+                <StatCard label="Age 15-64 Count" value={demographics?.count_age_15_64} />
             </div>
         </>
     );
@@ -66,7 +66,7 @@ export const DemographicsAccordion = () => {
             <StatCard label="Working Age Percentage" value={demographics?.pct_working_age?.toFixed(1)} />
             <div className="grid grid-cols-2 gap-1">
                 <StatCard label="Household Count" value={demographics?.household_count} />
-                <StatCard label="Household Size" value={demographics?.avg_household_size} />
+                <StatCard label="Household Size" value={demographics?.avg_household_size?.toFixed(1)} />
             </div>
         </>
 

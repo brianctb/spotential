@@ -23,7 +23,7 @@ export const BusinessSidebar = () => {
     const demographicsTabId = "demographics";
 
     return (
-        <Sidebar className="border-r">
+        <Sidebar className="border-r z-100">
             <SidebarHeader>
                 <h1 className="text-lg font-bold">Spotential</h1>
             </SidebarHeader>
