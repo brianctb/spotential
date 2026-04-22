@@ -42,12 +42,17 @@
 - [x] **Experiment Tracking:** Set up **MLflow** to log training runs.
 - [x] **Modeling:** Train **XGBoost Regressor** and evaluate with RMSE + R².
 - [x] **Inference API:** Load model in FastAPI; build scoring endpoint.
-- [ ] **UI Feature:** Add popover for business when hover/click, Add popover for search pin to display scoring metrics, add tab at menu to display census data
-- [ ] **UI Upgrade:** Upgrade UI for Menu, BusinessLayer, TractLayer dynamic color based on score
+- [x] **UI Feature:** Add popover for business when hover/click, Add popover for search pin to display scoring metrics, add tab at menu to display census data
+- [x] **UI Upgrade:** TractLayer dynamic color based on score
+- [x] **UI Feature:** Redirect to the tract and proper zoom after fetching
+- [ ] **UI Upgrade:** Upgrade UI for Menu, Demographics
+- [ ] **UI Upgrade:** Add animation for fetching, and delay, find new Search Pin svg
+- [ ] **UI Feature:** Add disable Tooltip
+- [ ] **UI Feature:** Add Dark Mode and mode trigger
 
 ---
 
-## Phase 5: Deployment
+## Phase 4: Deployment
 
 - [ ] **Docker:** Docker containerize app
 - [ ] **Deployment:** Frontend on Vercel, Backend on Fly.io, custom domain `spotential.dev`.
@@ -55,7 +60,7 @@
 
 ---
 
-## Phase 6: GenAI Layer & Production Polish
+## Phase 5: GenAI Layer & Production Polish
 
 **Goal:** Natural language queries and professional deployment.
 
