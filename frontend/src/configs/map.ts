@@ -20,4 +20,6 @@ export const MAP_CONFIG = {
     },
 
     style: "https://tiles.openfreemap.org/styles/liberty",
+
+    bizSymbolLayerId: "business-symbols"
 };

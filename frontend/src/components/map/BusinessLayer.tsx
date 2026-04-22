@@ -6,7 +6,7 @@ import { MAP_CONFIG } from "@/configs/map";
 
 export const BusinessLayer = ({ data }: { data: BusinessCollection; }) => {
     const symbolLayer: LayerProps = {
-        id: "business-symbols",
+        id: MAP_CONFIG.bizSymbolLayerId,
         type: "symbol",
         // Hides pins if they are currently inside a cluster.
         // 'point_count' is injected by MapLibre automatically when points group up.
