@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import type { BusinessType } from "@/types/business";
 
-interface PinLocation {
+export interface PinLocation {
     lat: number;
     lng: number;
 }
