@@ -17,17 +17,23 @@ import {
 import { BusinessCategoryAccordion } from "@/components/tabs/BusinessCategoryAccordion";
 import { DemographicsAccordion } from "@/components/tabs/DemographicsAccordion";
 import { ModeToggle } from "./ModeSwitch";
+import { useTheme } from "next-themes";
 
 export const BusinessSidebar = () => {
 
     const businessTabId = "businessTypes";
     const demographicsTabId = "demographics";
+    const { theme, setTheme } = useTheme()
 
     return (
         <Sidebar className="border-r z-3">
             <SidebarHeader className="flex flex-row items-center justify-between p-4">
                 <h1 className="text-lg font-bold">Spotential</h1>
-                <ModeToggle className="scale-125" />
+                <ModeToggle
+                    currentTheme={theme}
+                    onThemeChange={setTheme}
+                    className="scale-125"
+                />
             </SidebarHeader>
 
             <SidebarContent >
