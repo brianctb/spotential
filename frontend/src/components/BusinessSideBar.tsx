@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/tabs";
 import { BusinessCategoryAccordion } from "@/components/tabs/BusinessCategoryAccordion";
 import { DemographicsAccordion } from "@/components/tabs/DemographicsAccordion";
+import { ModeToggle } from "./ModeSwitch";
 
 export const BusinessSidebar = () => {
 
@@ -24,8 +25,9 @@ export const BusinessSidebar = () => {
 
     return (
         <Sidebar className="border-r z-3">
-            <SidebarHeader>
+            <SidebarHeader className="flex flex-row items-center justify-between p-4">
                 <h1 className="text-lg font-bold">Spotential</h1>
+                <ModeToggle className="scale-125" />
             </SidebarHeader>
 
             <SidebarContent >
