@@ -9,14 +9,15 @@ import { PinLocation, useMapStore } from "@/store/mapStore";
 import { TractLayer } from "./TractLayer";
 import { BusinessLayer } from "./BusinessLayer";
 import { useAnalysisQuery } from "@/hooks/useAnalysisQuery";
-import { useSearchParams } from "next/dist/client/components/navigation";
+import { useSearchParams } from "next/navigation";
 import { SearchPin } from "./PinMarker/SearchPin";
 import { BusinessBase } from "@/types/business";
 import { BusinessPopUp } from "./BusinessPopUp";
 import { useMapView } from "@/hooks/useMapView";
+import { toast } from "sonner";
 
 export const SpotentialMap = () => {
-    const { data: analysis } = useAnalysisQuery();
+    const { data: analysis, error } = useAnalysisQuery();
     const searchParams = useSearchParams();
 
     // state
@@ -24,6 +25,8 @@ export const SpotentialMap = () => {
     const [bizPopupCoords, setBizPopupCoords] = useState<PinLocation | null>(null);
     const setDraftPinLocation = useMapStore((state) => state.setDraftPin);
     const draftPinLocation = useMapStore((state) => state.draftPin);
+    // use a ref to track if we've already shown an error toast for the current error state
+    const hasToastedRef = useRef(false);
 
     // map setup
     const mapRef = useRef<MapRef>(null);
@@ -99,6 +102,17 @@ export const SpotentialMap = () => {
     useEffect(() => {
         flyToLocation(searchLat, searchLng);
     }, [analysis, searchLat, searchLng]);
+
+    useEffect(() => {
+        if (error && !hasToastedRef.current) {
+            hasToastedRef.current = true;
+            toast.error("Failed to analyze location.");
+        }
+
+        if (!error) {
+            hasToastedRef.current = false;
+        }
+    }, [error]);
 
     return (
         <Map

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Popover,
     PopoverContent,
@@ -9,6 +9,7 @@ import {
 import { PinMarker } from "./PinMarker";
 import { useAnalysisQuery } from "@/hooks/useAnalysisQuery";
 import { Progress } from "@/components/ui/progress";
+import { toast } from 'sonner'
 
 interface SearchPinProps {
     lat: number;
@@ -16,13 +17,21 @@ interface SearchPinProps {
 }
 
 export const SearchPin = ({ lat, lng }: SearchPinProps) => {
-    const { data: analysis } = useAnalysisQuery();
+    const { data: analysis, error } = useAnalysisQuery();
     const tractStats = analysis?.tract_stats
 
     const [open, setOpen] = useState(false);
 
+    const onClick = (e: React.MouseEvent<HTMLImageElement>) => {
+        if (error) {
+            toast.error("Fail to load tract for selected Location.")
+        }
+        e.stopPropagation();
+        setOpen(true);
+    }
+
     return (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open && !!tractStats} onOpenChange={setOpen}>
             {/* PopoverAnchor tells the popover to attach to the pin without adding click logic */}
             <PopoverAnchor asChild>
                 <PinMarker
@@ -30,10 +39,7 @@ export const SearchPin = ({ lat, lng }: SearchPinProps) => {
                     lat={lat}
                     className="w-20 h-20 transition-transform hover:scale-150 cursor-pointer"
                     src={"/search-pin.png"}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setOpen(true);
-                    }}
+                    onClick={onClick}
                 />
             </PopoverAnchor>
 
