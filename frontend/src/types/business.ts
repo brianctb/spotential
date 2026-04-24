@@ -10,3 +10,5 @@ export type GetBusinessesParams =
 export type BusinessCollection = components["schemas"]["BusinessCollection"];
 
 export type BusinessBase = components["schemas"]["BusinessBase"];
+
+export type BusinessCategory = components["schemas"]["BusinessCategory"]
