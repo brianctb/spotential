@@ -42,21 +42,23 @@ const CategoryTrigger = ({
 }: {
     label: string;
     icon: LucideIcon
-}) => (
-    /* Add color variable for hover */
-    < AccordionTrigger className="py-3 px-4 hover:no-underline hover:bg-accent/50 transition-colors group/radio" >
-        <div className="flex items-center gap-3">
-            {/* Add color variable for icon selected category */}
-            <Icon
-                size={18}
-                className="text-muted-foreground group-data-[state=open]/radio:text-primary"
-            />
-            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground group-data-[state=open]/radio:text-foreground">
-                {label}
-            </span>
-        </div>
-    </AccordionTrigger >
-);
+}) => {
+    return (
+        /* Add color variable for hover */
+        < AccordionTrigger className="py-3 px-4 hover:no-underline hover:bg-accent/50 transition-colors group/radio" >
+            <div className="flex items-center gap-3">
+                {/* Add color variable for icon selected category */}
+                <Icon
+                    size={18}
+                    className="text-muted-foreground group-data-[state=open]/radio:text-primary"
+                />
+                <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground group-data-[state=open]/radio:text-foreground">
+                    {label}
+                </span>
+            </div>
+        </AccordionTrigger >
+    )
+}
 
 const BusinessItem = ({
     item,
