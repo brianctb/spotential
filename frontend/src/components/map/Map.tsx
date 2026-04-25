@@ -106,7 +106,13 @@ export const SpotentialMap = () => {
     useEffect(() => {
         if (error && !hasToastedRef.current) {
             hasToastedRef.current = true;
-            toast.error("Failed to analyze location.");
+            toast.error("Failed to analyze location.", {
+                description: " Please select a different business or location.",
+                classNames: {
+                    icon: "text-destructive",
+                    description: "!text-primary"
+                },
+            });
         }
 
         if (!error) {

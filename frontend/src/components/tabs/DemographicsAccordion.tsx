@@ -21,20 +21,22 @@ const DemographicSection = ({
     value,
     title,
     icon: Icon,
+    iconClassName = "text-muted-foreground",
     children,
-    isPrimary = false
 }: {
     value: string;
     title: string;
-    icon: any;
+    icon: React.ElementType;
+    iconClassName?: string;
     children: React.ReactNode;
-    isPrimary?: boolean;
 }) => (
     <AccordionItem value={value} className="border-b-0 px-4">
-        <AccordionTrigger className="hover:no-underline py-3">
+        <AccordionTrigger className="hover:no-underline py-3 group transition-all">
             <div className="flex items-center gap-2">
-                <Icon className={`h-4 w-4 ${isPrimary ? 'text-primary' : 'text-muted-foreground'}`} />
-                <span className={`text-sm font-semibold ${isPrimary ? 'text-primary' : ''}`}>{title}</span>
+                <Icon className={`h-4 w-4 ${iconClassName}`} />
+                <span className="text-sm text-muted-foreground group-data-[state=open]:font-semibold group-data-[state=open]:text-foreground">
+                    {title}
+                </span>
             </div>
         </AccordionTrigger>
         <AccordionContent className="space-y-2">
@@ -48,7 +50,12 @@ export const DemographicsAccordion = () => {
     const demographics = analysis?.demographics;
     const tract_stats = analysis?.tract_stats;
 
-    if (!demographics) return null;
+    if (!demographics) return (
+        <div className="p-4 text-md text-muted-foreground text-center flex flex-col gap-3">
+            <p className="text-lg">No area has been analyzed</p>
+            <p>Please Spotentiate</p>
+        </div>
+    )
 
     const populationContent = (
         <>
@@ -100,6 +107,7 @@ export const DemographicsAccordion = () => {
                 value="population"
                 title="Population"
                 icon={Users}
+                iconClassName="text-blue-500"
                 children={populationContent}
             />
 
@@ -108,6 +116,7 @@ export const DemographicsAccordion = () => {
                 value="economics"
                 title="Economics"
                 icon={Landmark}
+                iconClassName="text-amber-500"
                 children={economicsContent}
             />
 
@@ -116,6 +125,7 @@ export const DemographicsAccordion = () => {
                 value="education"
                 title="Education"
                 icon={GraduationCap}
+                iconClassName="text-emerald-500"
                 children={educationContent}
             />
 
@@ -124,6 +134,7 @@ export const DemographicsAccordion = () => {
                 value="opportunity"
                 title="Opportunity"
                 icon={Sparkle}
+                iconClassName="text-yellow-400"
                 children={opportunityContent}
             />
 

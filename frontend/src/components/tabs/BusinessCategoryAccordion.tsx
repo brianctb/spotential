@@ -8,7 +8,7 @@ import {
 import {
     Tooltip,
     TooltipContent,
-    TooltipTrigger
+    TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -38,21 +38,26 @@ const CATEGORY_ICONS: Record<BusinessCategory, LucideIcon> = {
 
 const CategoryTrigger = ({
     label,
-    icon: Icon
+    icon: Icon,
+    selected
 }: {
     label: string;
     icon: LucideIcon
+    selected?: boolean
 }) => {
     return (
-        /* Add color variable for hover */
-        < AccordionTrigger className="py-3 px-4 hover:no-underline hover:bg-accent/50 transition-colors group/radio" >
+        <AccordionTrigger className="py-3 px-4 hover:no-underline hover:bg-accent/50 transition-colors group/radio" >
             <div className="flex items-center gap-3">
-                {/* Add color variable for icon selected category */}
                 <Icon
                     size={18}
-                    className="text-muted-foreground group-data-[state=open]/radio:text-primary"
+                    className={cn(
+                        "transition-colors",
+                        selected
+                            ? "text-selected-blue"
+                            : "text-muted-foreground group-data-[state=open]/radio:text-foreground"
+                    )}
                 />
-                <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground group-data-[state=open]/radio:text-foreground">
+                <span className="text-xs font-bold uppercase text-muted-foreground group-data-[state=open]/radio:text-foreground">
                     {label}
                 </span>
             </div>
@@ -68,7 +73,6 @@ const BusinessItem = ({
     isSelected: boolean
 }) => {
     return (
-        // Add color variable for hover
         // Label is for converting to allow entire row click here
         // htmlFor is linked towards GroupItem ID, when this is clicked, it triggers click at ID
         <Label
@@ -82,12 +86,10 @@ const BusinessItem = ({
         >
             {/* hiding default circle to replace with a custom indicator */}
             <RadioGroupItem value={item.key} id={item.key} className="sr-only absolute" />
-
-            {/* use selected variable color here for circle's bg */}
             <div
                 className={cn(
                     "w-4 h-4 rounded-full border flex items-center justify-center transition-all shrink-0",
-                    isSelected ? "bg-primary border-primary" : "border-input"
+                    isSelected && "bg-selected-blue border-transparent"
                 )}
             >
                 {isSelected && (
@@ -114,15 +116,14 @@ const SpotentiateButton = ({
     return (
         <Button
             size="lg"
-            // Change button bg color with variable
-            className="w-full rounded-xl font-bold shadow-lg relative transition-all duration-300"
+            className="bg-selected-blue w-full rounded-xl font-bold shadow-lg relative transition-all duration-300 text-[oklch(0.98_0.005_260)]"
             disabled={disabled}
             onClick={onClick}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
             {/* change text color */}
-            <span className="relative z-10">{isFetching ? "Analyzing..." : "Spotentiate"}</span>
+            <span className="relative">{isFetching ? "Analyzing..." : "Spotentiate"}</span>
             <Sparkles
                 className={cn(
                     "absolute right-4 transition-all duration-300",
@@ -185,12 +186,12 @@ export const BusinessCategoryAccordion = () => {
                     <AccordionItem
                         key={category.key}
                         value={category.key}
-                        // Add color variable
-                        className="border border-border rounded-lg bg-card overflow-hidden"
+                        className="border border-border rounded-lg overflow-hidden bg-card"
                     >
                         <CategoryTrigger
                             label={category.label}
                             icon={Icon}
+                            selected={category.key === activeCategoryKey}
                         />
 
                         <AccordionContent className="pb-1 px-1">
@@ -222,8 +223,8 @@ export const BusinessCategoryAccordion = () => {
                     </div>
                 </TooltipTrigger>
                 {showTooltip && (
-                    <TooltipContent side="top" className="z-50 shadow-xl border border-border">
-                        <p className="text-xs">{getToolTipmMsg()}</p>
+                    <TooltipContent side="top" className="z-50 my-2 shadow-xl border border-border bg-card">
+                        <p className="text-primary">{getToolTipmMsg()}</p>
                     </TooltipContent>
                 )}
             </Tooltip>

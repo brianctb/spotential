@@ -5,36 +5,49 @@ import { useSearchParams } from "next/navigation"; // Pull from the URL
 import { analysisApi } from "@/api/analysis";
 import { AnalysisData } from "@/types/analysis";
 import { BusinessType } from "@/types/business";
+import { useMemo } from "react";
 
 export function useAnalysisQuery() {
     const searchParams = useSearchParams();
 
-    const selectedType =
-        searchParams.get("business_type") as BusinessType | null;
+    const { selectedType, lat, lng, isValid } = useMemo(() => {
+        const selectedType =
+            searchParams.get("business_type") as BusinessType | null;
 
-    const lat = Number(searchParams.get("lat"));
-    const lng = Number(searchParams.get("lng"));
+        const latParam = searchParams.get("lat");
+        const lngParam = searchParams.get("lng");
 
-    const isValidCoords =
-        !Number.isNaN(lat) &&
-        !Number.isNaN(lng);
+        if (!selectedType || !latParam || !lngParam) {
+            return { selectedType: null, lat: null, lng: null, isValid: false };
+        }
 
-    const isValid =
-        !!selectedType &&
-        isValidCoords;
+        const lat = Number(latParam);
+        const lng = Number(lngParam);
+
+        const isValidCoords =
+            !Number.isNaN(lat) &&
+            !Number.isNaN(lng);
+
+        const isValid =
+            !!selectedType &&
+            isValidCoords;
+
+        return { selectedType, lat, lng, isValid };
+    }, [searchParams]);
 
     return useQuery<AnalysisData>({
-        queryKey: ["analysis", selectedType, lng, lat],
+        queryKey: ["analysis", selectedType, lat, lng],
 
         queryFn: () =>
             analysisApi.getAnalysis({
                 business_type: selectedType!,
-                lng,
-                lat,
+                lng: lng!,
+                lat: lat!,
             }),
 
         enabled: isValid,
 
+        retryOnMount: false,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
         refetchOnMount: false,

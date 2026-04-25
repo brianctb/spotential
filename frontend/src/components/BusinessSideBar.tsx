@@ -27,8 +27,8 @@ export const BusinessSidebar = () => {
 
     return (
         <Sidebar className="border-r z-3">
-            <SidebarHeader className="flex flex-row items-center justify-between p-4">
-                <h1 className="text-lg font-bold">Spotential</h1>
+            <SidebarHeader className="flex flex-row items-center justify-between p-4 bg-background">
+                <h1 className="text-lg font-bold text-app-title">Spotential</h1>
                 <ModeToggle
                     currentTheme={theme}
                     onThemeChange={setTheme}
@@ -36,7 +36,7 @@ export const BusinessSidebar = () => {
                 />
             </SidebarHeader>
 
-            <SidebarContent >
+            <SidebarContent className="bg-background">
                 <Tabs defaultValue={businessTabId} className="w-full">
                     <TabsList variant="line" className="w-full flex justify-center">
                         <TabsTrigger value={businessTabId}>Business Types</TabsTrigger>
@@ -45,9 +45,6 @@ export const BusinessSidebar = () => {
 
                     <TabsContent value={businessTabId}>
                         <SidebarGroup>
-                            <SidebarGroupLabel className="text-center text-sm text-muted-foreground">
-                                Select a business type to analyze
-                            </SidebarGroupLabel>
                             <SidebarGroupContent>
                                 <BusinessCategoryAccordion />
                             </SidebarGroupContent>
@@ -61,8 +58,6 @@ export const BusinessSidebar = () => {
                             </SidebarGroupContent>
                         </SidebarGroup>
                     </TabsContent>
-
-
                 </Tabs>
 
 
