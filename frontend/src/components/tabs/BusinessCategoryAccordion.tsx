@@ -123,7 +123,12 @@ const SpotentiateButton = ({
             onMouseLeave={() => setIsHovered(false)}
         >
             {/* change text color */}
-            <span className="relative">{isFetching ? "Analyzing..." : "Spotentiate"}</span>
+            <span className={cn("relative",
+                isFetching && "animate-pulse"
+            )}>
+                {isFetching ? "Analyzing..." : "Spotentiate"}
+
+            </span>
             <Sparkles
                 className={cn(
                     "absolute right-4 transition-all duration-300",
@@ -140,6 +145,7 @@ export const BusinessCategoryAccordion = () => {
     const searchParams = useSearchParams();
     const draftPinLocation = useMapStore((state) => state.draftPin);
     const setDraftPinLocation = useMapStore((state) => state.setDraftPin);
+    const setCanShowAnalysis = useMapStore((state) => state.setCanShowAnalysis)
 
     const [businessType, setBusinessType] = useState<BusinessType | null>(
         (searchParams.get("business_type") as BusinessType) || null
@@ -157,6 +163,7 @@ export const BusinessCategoryAccordion = () => {
         params.set("lng", draftPinLocation.lng.toString());
         router.push(`?${params.toString()}`);
         setDraftPinLocation(null);
+        setCanShowAnalysis(false);
     };
 
     const getToolTipmMsg = () => {

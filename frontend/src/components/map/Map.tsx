@@ -25,6 +25,7 @@ export const SpotentialMap = () => {
     const [bizPopupCoords, setBizPopupCoords] = useState<PinLocation | null>(null);
     const setDraftPinLocation = useMapStore((state) => state.setDraftPin);
     const draftPinLocation = useMapStore((state) => state.draftPin);
+    const canShowAnalysis = useMapStore((state) => state.canShowAnalysis)
     // use a ref to track if we've already shown an error toast for the current error state
     const hasToastedRef = useRef(false);
 
@@ -32,6 +33,9 @@ export const SpotentialMap = () => {
     const mapRef = useRef<MapRef>(null);
     const searchLat = Number(searchParams.get("lat"));
     const searchLng = Number(searchParams.get("lng"));
+    const initialView = (searchLat && searchLng)
+        ? { latitude: searchLat, longitude: searchLng, zoom: MAP_CONFIG.defaultZoom } // Use search params if they exist
+        : MAP_CONFIG.vancouver.center; // Fallback to config
 
     const { flyToLocation } = useMapView(mapRef);
 
@@ -123,7 +127,7 @@ export const SpotentialMap = () => {
     return (
         <Map
             ref={mapRef}
-            initialViewState={MAP_CONFIG.vancouver.center}
+            initialViewState={initialView}
             style={{ width: "100%", height: "100%" }}
             mapStyle={MAP_CONFIG.mapStyle}
             maxBounds={MAP_CONFIG.vancouver.bounds}
@@ -139,7 +143,6 @@ export const SpotentialMap = () => {
             onZoom={handleZoom}
             interactiveLayerIds={[MAP_CONFIG.bizSymbolLayerId]}
         >
-            <NavigationControl position="top-right" />
             {draftPinLocation && (
                 <PinMarker
                     lng={draftPinLocation.lng}
@@ -154,7 +157,7 @@ export const SpotentialMap = () => {
                 />
             )}
 
-            {analysis && (
+            {analysis && canShowAnalysis && (
                 <>
                     <TractLayer data={analysis.tract} />
                     <BusinessLayer data={analysis.businesses} />
