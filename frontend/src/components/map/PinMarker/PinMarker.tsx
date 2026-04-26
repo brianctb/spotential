@@ -11,16 +11,20 @@ export const PinMarker = forwardRef<HTMLImageElement, PinMarkerProps>(({
     alt = "map pin",
     className = "w-9 h-9",
     onClick,
+    overlay
 }, ref) => {
     return (
         <Marker longitude={lng} latitude={lat} anchor="bottom">
-            <img
-                ref={ref}
-                src={src}
-                alt={alt}
-                className={className}
-                onClick={onClick}
-            />
+            <div className="relative">
+                {overlay}
+                <img
+                    ref={ref}
+                    src={src}
+                    alt={alt}
+                    className={className}
+                    onClick={onClick}
+                />
+            </div>
         </Marker>
     )
 });

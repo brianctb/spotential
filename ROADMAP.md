@@ -45,8 +45,8 @@
 - [x] **UI Feature:** Add popover for business when hover/click, Add popover for search pin to display scoring metrics, add tab at menu to display census data
 - [x] **UI Upgrade:** TractLayer dynamic color based on score
 - [x] **UI Feature:** Redirect to the tract and proper zoom after fetching
-- [ ] **UI Upgrade:** Upgrade UI for Menu, Demographics
-- [ ] **UI Upgrade:** Add animation for fetching, and delay
+- [x] **UI Upgrade:** Upgrade UI for Menu, Demographics
+- [x] **UI Upgrade:** Add animation for fetching, and delay
 - [x] **UI Feature:** Add disable Tooltip and error sonner
 - [x] **UI Feature:** Add Dark Mode and mode trigger
 

@@ -21,5 +21,6 @@ export const MAP_CONFIG = {
         maxZoom: 19,
     },
 
+    defaultZoom: 14,
     bizSymbolLayerId: "business-symbols"
 };

@@ -10,6 +10,9 @@ import { PinMarker } from "./PinMarker";
 import { useAnalysisQuery } from "@/hooks/useAnalysisQuery";
 import { Progress } from "@/components/ui/progress";
 import { toast } from 'sonner'
+import { BottomCenteredContainer } from "@/components/animation/BottmCeneterdContainer";
+import { SearchPinSonar } from "@/components/animation/SearchPinSonar";
+import { useMapStore } from "@/store/mapStore";
 
 interface SearchPinProps {
     lat: number;
@@ -17,10 +20,11 @@ interface SearchPinProps {
 }
 
 export const SearchPin = ({ lat, lng }: SearchPinProps) => {
-    const { data: analysis, error } = useAnalysisQuery();
+    const { data: analysis, error, isFetching } = useAnalysisQuery();
     const tractStats = analysis?.tract_stats
 
     const [open, setOpen] = useState(false);
+    const setCanShowAnalysis = useMapStore(state => state.setCanShowAnalysis)
 
     const onClick = (e: React.MouseEvent<HTMLImageElement>) => {
         if (error) {
@@ -43,9 +47,17 @@ export const SearchPin = ({ lat, lng }: SearchPinProps) => {
                 <PinMarker
                     lng={lng}
                     lat={lat}
-                    className="w-20 h-20 transition-transform hover:scale-150 cursor-pointer"
+                    className="relative z-10 w-20 h-20 transition-transform hover:scale-150 cursor-pointer"
                     src={"/search-pin.png"}
                     onClick={onClick}
+                    overlay={
+                        <BottomCenteredContainer>
+                            <SearchPinSonar
+                                isActive={isFetching}
+                                onAnimationComplete={() => { setCanShowAnalysis(true) }}
+                            />
+                        </BottomCenteredContainer>
+                    }
                 />
             </PopoverAnchor>
 

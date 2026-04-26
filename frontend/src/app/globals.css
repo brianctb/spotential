@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import 'maplibre-gl/dist/maplibre-gl.css';
+@import "maplibre-gl/dist/maplibre-gl.css";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
@@ -49,6 +49,8 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --animate-sonar: sonar 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+  --animate-sonar-rev: sonar-reverse 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 :root {
@@ -87,7 +89,7 @@
 }
 
 .dark {
-  --background: oklch(18.2%, 0.003, 200.0);
+  --background: oklch(18.2%, 0.003, 200);
   --foreground: oklch(0.985 0 0);
   --card: oklch(23.717% 0.00301 197.448);
   --card-foreground: oklch(0.985 0 0);
@@ -130,5 +132,27 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@keyframes sonar {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(5);
+    opacity: 0;
+  }
+}
+
+@keyframes sonar-reverse {
+  0% {
+    transform: scale(5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 1;
   }
 }
