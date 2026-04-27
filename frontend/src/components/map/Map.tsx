@@ -1,6 +1,6 @@
 "use client";
 
-import Map, { NavigationControl } from "react-map-gl/maplibre";
+import Map from "react-map-gl/maplibre";
 import type { MapLayerMouseEvent, MapRef, ViewStateChangeEvent } from "react-map-gl/maplibre";
 import { PinMarker } from "@/components/map/PinMarker/PinMarker";
 import { useEffect, useRef, useState } from "react";
@@ -15,6 +15,10 @@ import { BusinessBase } from "@/types/business";
 import { BusinessPopUp } from "./BusinessPopUp";
 import { useMapView } from "@/hooks/useMapView";
 import { toast } from "sonner";
+import { ModeToggle } from "../ModeSwitch";
+import { Theme } from "../ModeSwitch";
+import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
 
 export const SpotentialMap = () => {
     const { data: analysis, error } = useAnalysisQuery();
@@ -23,6 +27,8 @@ export const SpotentialMap = () => {
     // state
     const [selectedBusiness, setSelectedBusiness] = useState<BusinessBase | null>(null);
     const [bizPopupCoords, setBizPopupCoords] = useState<PinLocation | null>(null);
+    const [mapTheme, setMapTheme] = useState<Theme>('light');
+    const { theme, setTheme } = useTheme()
     const setDraftPinLocation = useMapStore((state) => state.setDraftPin);
     const draftPinLocation = useMapStore((state) => state.draftPin);
     const canShowAnalysis = useMapStore((state) => state.canShowAnalysis)
@@ -125,52 +131,60 @@ export const SpotentialMap = () => {
     }, [error]);
 
     return (
-        <Map
-            ref={mapRef}
-            initialViewState={initialView}
-            style={{ width: "100%", height: "100%" }}
-            mapStyle={MAP_CONFIG.mapStyle}
-            maxBounds={MAP_CONFIG.vancouver.bounds}
-            minZoom={MAP_CONFIG.limits.minZoom}
-            maxZoom={MAP_CONFIG.limits.maxZoom}
-            onClick={handleMapClick}
-            onLoad={onMapLoad}
-            onMouseMove={handleMouseMove}
-            onMouseDown={() => {
-                setBizPopupCoords(null);
-                setSelectedBusiness(null);
-            }}
-            onZoom={handleZoom}
-            interactiveLayerIds={[MAP_CONFIG.bizSymbolLayerId]}
-        >
-            {draftPinLocation && (
-                <PinMarker
-                    lng={draftPinLocation.lng}
-                    lat={draftPinLocation.lat}
-                />
-            )}
+        <div className="relative w-full h-full">
+            <Map
+                ref={mapRef}
+                initialViewState={initialView}
+                style={{ width: "100%", height: "100%" }}
+                mapStyle={mapTheme == 'light' ? MAP_CONFIG.mapStyle : MAP_CONFIG.darkMapStyle}
+                maxBounds={MAP_CONFIG.vancouver.bounds}
+                minZoom={MAP_CONFIG.limits.minZoom}
+                maxZoom={MAP_CONFIG.limits.maxZoom}
+                onClick={handleMapClick}
+                onLoad={onMapLoad}
+                onMouseMove={handleMouseMove}
+                onMouseDown={() => {
+                    setBizPopupCoords(null);
+                    setSelectedBusiness(null);
+                }}
+                onZoom={handleZoom}
+                interactiveLayerIds={[MAP_CONFIG.bizSymbolLayerId]}
+            >
+                {draftPinLocation && (
+                    <PinMarker lng={draftPinLocation.lng} lat={draftPinLocation.lat} />
+                )}
 
-            {searchLat && searchLng && (
-                <SearchPin
-                    lng={searchLng}
-                    lat={searchLat}
-                />
-            )}
+                {searchLat && searchLng && (
+                    <SearchPin lng={searchLng} lat={searchLat} />
+                )}
 
-            {analysis && canShowAnalysis && (
-                <>
-                    <TractLayer data={analysis.tract} />
-                    <BusinessLayer data={analysis.businesses} />
-                </>
-            )}
+                {analysis && canShowAnalysis && (
+                    <>
+                        <TractLayer data={analysis.tract} />
+                        <BusinessLayer data={analysis.businesses} />
+                    </>
+                )}
 
-            {bizPopupCoords && selectedBusiness && (
-                <BusinessPopUp
-                    lat={bizPopupCoords.lat}
-                    lng={bizPopupCoords.lng}
-                    business={selectedBusiness}
+                {bizPopupCoords && selectedBusiness && (
+                    <BusinessPopUp
+                        lat={bizPopupCoords.lat}
+                        lng={bizPopupCoords.lng}
+                        business={selectedBusiness}
+                    />
+                )}
+            </Map>
+
+            <div className="absolute top-10 right-10 z-10">
+                <ModeToggle
+                    currentTheme={mapTheme}
+                    onThemeChange={setMapTheme}
+                    className="scale-200 dark:data-unchecked:bg-primary"
+                    sunIconClassName={cn(
+                        "w-2.5 h-2.5",
+                        theme === 'dark' && "text-black"
+                    )}
                 />
-            )}
-        </Map>
+            </div>
+        </div>
     );
 }

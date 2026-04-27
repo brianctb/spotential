@@ -7,6 +7,8 @@ import { AnalysisData } from "@/types/analysis";
 import { BusinessType } from "@/types/business";
 import { useMemo } from "react";
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export function useAnalysisQuery() {
     const searchParams = useSearchParams();
 
@@ -38,12 +40,15 @@ export function useAnalysisQuery() {
     return useQuery<AnalysisData>({
         queryKey: ["analysis", selectedType, lat, lng],
 
-        queryFn: () =>
-            analysisApi.getAnalysis({
+        queryFn: async () => {
+            // await sleep(5000);
+
+            return analysisApi.getAnalysis({
                 business_type: selectedType!,
                 lng: lng!,
                 lat: lat!,
-            }),
+            })
+        },
 
         enabled: isValid,
 

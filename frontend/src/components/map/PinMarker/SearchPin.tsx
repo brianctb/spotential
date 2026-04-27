@@ -28,7 +28,7 @@ export const SearchPin = ({ lat, lng }: SearchPinProps) => {
 
     const onClick = (e: React.MouseEvent<HTMLImageElement>) => {
         if (error) {
-            toast.error("Fail to load tract for selected Location.", {
+            toast.error("Fail to load tract for selected location.", {
                 description: "Please Spotentiate again.",
                 classNames: {
                     icon: "text-destructive",

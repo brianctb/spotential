@@ -30,7 +30,7 @@ export const BusinessSidebar = () => {
             <SidebarHeader className="flex flex-row items-center justify-between p-4 bg-background">
                 <h1 className="text-lg font-bold text-app-title">Spotential</h1>
                 <ModeToggle
-                    currentTheme={theme}
+                    currentTheme={theme === 'dark' ? 'dark' : 'light'}
                     onThemeChange={setTheme}
                     className="scale-125"
                 />

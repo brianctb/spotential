@@ -49,6 +49,8 @@
 - [x] **UI Upgrade:** Add animation for fetching, and delay
 - [x] **UI Feature:** Add disable Tooltip and error sonner
 - [x] **UI Feature:** Add Dark Mode and mode trigger
+- [ ] **UI Feature:** Add UI for mobile/small screen view
+- [x] **UI Feature:** Add darkmode for map style
 
 ---
 
