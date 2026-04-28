@@ -61,7 +61,7 @@ export const SearchPin = ({ lat, lng }: SearchPinProps) => {
                 />
             </PopoverAnchor>
 
-            <PopoverContent className="w-64 p-4" side="top" align="center">
+            <PopoverContent className="w-64 p-4 z-1" side="top" align="center">
                 <PopoverHeader>
                     <PopoverTitle className="text-md font-semibold border-b border-gray-200 pb-2">
                         {`Tract - ${tractStats?.tract_id}`}
