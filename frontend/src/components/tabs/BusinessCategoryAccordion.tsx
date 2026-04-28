@@ -113,7 +113,6 @@ export const BusinessCategoryAccordion = ({
     const setSelectedType = useMapStore((state) => state.setSelectedType)
 
     const { data: menu, isLoading } = useMenuQuery();
-    const showTooltip = !selectedType || !draftPinLocation;
 
     const getToolTipmMsg = () => {
         if (!selectedType && !draftPinLocation) return "Select a category and place a pin.";
@@ -180,20 +179,10 @@ export const BusinessCategoryAccordion = ({
                     </AccordionItem>
                 );
             })}
-
             {showButton &&
-                <Tooltip delayDuration={200}>
-                    <TooltipTrigger asChild>
-                        <div className="mt-4 w-2/3 mx-auto">
-                            <SpotentiateButton />
-                        </div>
-                    </TooltipTrigger>
-                    {showTooltip && (
-                        <TooltipContent side="top" className="z-50 my-2 shadow-xl border border-border bg-card">
-                            <p className="text-primary">{getToolTipmMsg()}</p>
-                        </TooltipContent>
-                    )}
-                </Tooltip>
+                <div className="mt-4 w-2/3 mx-auto">
+                    <SpotentiateButton />
+                </div>
             }
 
         </Accordion >

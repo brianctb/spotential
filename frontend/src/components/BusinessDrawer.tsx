@@ -5,7 +5,7 @@ import { Drawer } from 'vaul';
 import { BusinessAnalysisContent } from "./BusinessAnalysisContent";
 import { SpotentiateButton } from './SpotentiateButton';
 
-const snapPoints = [0.15, 0.5, 1];
+const snapPoints = [0.15, 0.5, 0.8];
 
 export const BusinessDrawer = () => {
     const [snap, setSnap] = useState<number | string | null>(snapPoints[0]);

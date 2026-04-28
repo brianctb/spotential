@@ -5,10 +5,10 @@ import {
     SidebarContent,
     SidebarHeader
 } from "@/components/ui/sidebar";
-
 import { ModeToggle } from "./ModeSwitch";
 import { useTheme } from "next-themes";
 import { BusinessAnalysisContent } from "./BusinessAnalysisContent";
+import { SpotentialLogo } from "@/SpotentialLogo";
 
 export const BusinessSidebar = () => {
 
@@ -17,7 +17,10 @@ export const BusinessSidebar = () => {
     return (
         <Sidebar className="border-r z-3">
             <SidebarHeader className="flex flex-row items-center justify-between p-4 bg-background">
-                <h1 className="text-lg font-bold text-app-title">Spotential</h1>
+                <div className="flex items-center gap-2">
+                    <SpotentialLogo />
+                    <h1 className="text-lg font-bold text-app-title">Spotential</h1>
+                </div>
                 <ModeToggle
                     currentTheme={theme === 'dark' ? 'dark' : 'light'}
                     onThemeChange={setTheme}

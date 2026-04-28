@@ -19,8 +19,10 @@ import { ModeToggle } from "../ModeSwitch";
 import { Theme } from "../ModeSwitch";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const SpotentialMap = () => {
+    const isMobile = useIsMobile()
     const { data: analysis, error } = useAnalysisQuery();
     const searchParams = useSearchParams();
 
@@ -41,7 +43,7 @@ export const SpotentialMap = () => {
     const searchLng = Number(searchParams.get("lng"));
     const initialView = (searchLat && searchLng)
         ? { latitude: searchLat, longitude: searchLng, zoom: MAP_CONFIG.defaultZoom } // Use search params if they exist
-        : MAP_CONFIG.vancouver.center; // Fallback to config
+        : MAP_CONFIG.vancouver.center;
 
     const { flyToLocation } = useMapView(mapRef);
 
@@ -174,7 +176,10 @@ export const SpotentialMap = () => {
                 )}
             </Map>
 
-            <div className="absolute top-10 right-10 z-10">
+
+            <div className={cn("absolute z-10 right-10",
+                isMobile ? "top-20" : "top-10"
+            )}>
                 <ModeToggle
                     currentTheme={mapTheme}
                     onThemeChange={setMapTheme}
