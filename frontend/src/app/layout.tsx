@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/sonner"
+import { SpotentialLogo } from "@/SpotentialLogo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,6 +18,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Spotential",
   description: "A business location analysis tool that helps entrepreneurs find the best location for their business.",
+  icons: {
+    icon: '/spotential-icon.svg'
+  },
 };
 
 export default function RootLayout({
