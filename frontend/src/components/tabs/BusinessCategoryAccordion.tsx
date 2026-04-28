@@ -12,11 +12,8 @@ import {
 } from "@/components/ui/tooltip";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { useSearchParams, useRouter } from "next/navigation";
 import { useMapStore } from "@/store/mapStore";
-import { useState } from "react";
-import { useAnalysisQuery } from "@/hooks/useAnalysisQuery";
-import { Button } from "../ui/button";
+import { SpotentiateButton } from "../SpotentiateButton";
 import { useMenuQuery } from "@/hooks/useMenuQuery";
 import { cn } from "@/lib/utils";
 import {
@@ -25,9 +22,11 @@ import {
     ShoppingBag,
     Briefcase,
     Check,
-    Sparkles,
     LucideIcon
 } from "lucide-react";
+import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { useBusinessMetadata } from "@/hooks/useBusinessMeta";
 
 const CATEGORY_ICONS: Record<BusinessCategory, LucideIcon> = {
     "food & drink": Utensils,
@@ -102,82 +101,45 @@ const BusinessItem = ({
     );
 };
 
-const SpotentiateButton = ({
-    disabled,
-    onClick,
-    isFetching
+export const BusinessCategoryAccordion = ({
+    showButton = false,
 }: {
-    disabled: boolean;
-    onClick: () => void;
-    isFetching: boolean
+    showButton?: boolean;
 }) => {
-    const [isHovered, setIsHovered] = useState(false);
-
-    return (
-        <Button
-            size="lg"
-            className="bg-selected-blue w-full rounded-xl font-bold shadow-lg relative transition-all duration-300 text-[oklch(0.98_0.005_260)]"
-            disabled={disabled}
-            onClick={onClick}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-        >
-            {/* change text color */}
-            <span className={cn("relative",
-                isFetching && "animate-pulse"
-            )}>
-                {isFetching ? "Analyzing..." : "Spotentiate"}
-
-            </span>
-            <Sparkles
-                className={cn(
-                    "absolute right-4 transition-all duration-300",
-                    disabled ? "opacity-10" : isHovered ? "opacity-100 scale-125 text-yellow-400" : "opacity-50"
-                )}
-                size={18}
-            />
-        </Button>
-    );
-};
-
-export const BusinessCategoryAccordion = () => {
-    const router = useRouter();
-    const searchParams = useSearchParams();
+    const searchParams = useSearchParams()
+    const businessMeta = useBusinessMetadata()
     const draftPinLocation = useMapStore((state) => state.draftPin);
-    const setDraftPinLocation = useMapStore((state) => state.setDraftPin);
-    const setCanShowAnalysis = useMapStore((state) => state.setCanShowAnalysis)
-
-    const [businessType, setBusinessType] = useState<BusinessType | null>(
-        (searchParams.get("business_type") as BusinessType) || null
-    );
+    const selectedType = useMapStore((state) => state.selectedType)
+    const setSelectedType = useMapStore((state) => state.setSelectedType)
 
     const { data: menu, isLoading } = useMenuQuery();
-    const { isFetching } = useAnalysisQuery();
-    const showTooltip = !businessType || !draftPinLocation;
-
-    const handleSpotentiate = () => {
-        if (!businessType || !draftPinLocation) return;
-        const params = new URLSearchParams();
-        params.set("business_type", businessType);
-        params.set("lat", draftPinLocation.lat.toString());
-        params.set("lng", draftPinLocation.lng.toString());
-        router.push(`?${params.toString()}`);
-        setDraftPinLocation(null);
-        setCanShowAnalysis(false);
-    };
+    const showTooltip = !selectedType || !draftPinLocation;
 
     const getToolTipmMsg = () => {
-        if (!businessType && !draftPinLocation) return "Select a category and place a pin.";
-        if (!businessType) return "Please select a business category.";
+        if (!selectedType && !draftPinLocation) return "Select a category and place a pin.";
+        if (!selectedType) return "Please select a business category.";
         if (!draftPinLocation) return "Please place a pin on the map.";
     };
+
+    useEffect(() => {
+        if (businessMeta.size === 0) return;
+
+        const urlType = searchParams.get("business_type");
+        if (urlType && businessMeta.has(urlType)) {
+            if (urlType !== selectedType) {
+                setSelectedType(urlType as BusinessType);
+            }
+        } else if (urlType) {
+            console.warn(`Invalid business type: ${urlType}`);
+        }
+    }, [searchParams, businessMeta]);
 
     if (isLoading) return <div className="p-4 text-sm text-muted-foreground animate-pulse">Loading...</div>;
 
     if (!menu || menu.length === 0) return null;
 
     const activeCategoryKey = menu.find((category) =>
-        category.business.some((item) => item.key === businessType)
+        category.business.some((item) => item.key === selectedType)
     )?.key;
 
     return (
@@ -203,14 +165,14 @@ export const BusinessCategoryAccordion = () => {
 
                         <AccordionContent className="pb-1 px-1">
                             <RadioGroup
-                                value={businessType || ""}
-                                onValueChange={(value) => setBusinessType(value as BusinessType)}
+                                value={selectedType || ""}
+                                onValueChange={(value) => setSelectedType(value as BusinessType)}
                             >
                                 {category.business.map((item) =>
                                     <BusinessItem
                                         key={item.key}
                                         item={item}
-                                        isSelected={businessType === item.key}
+                                        isSelected={selectedType === item.key}
                                     />
                                 )}
                             </RadioGroup>
@@ -219,22 +181,21 @@ export const BusinessCategoryAccordion = () => {
                 );
             })}
 
-            <Tooltip delayDuration={200}>
-                <TooltipTrigger asChild>
-                    <div className="mt-4 w-2/3 mx-auto">
-                        <SpotentiateButton
-                            disabled={!businessType || !draftPinLocation || isFetching}
-                            onClick={handleSpotentiate}
-                            isFetching={isFetching}
-                        />
-                    </div>
-                </TooltipTrigger>
-                {showTooltip && (
-                    <TooltipContent side="top" className="z-50 my-2 shadow-xl border border-border bg-card">
-                        <p className="text-primary">{getToolTipmMsg()}</p>
-                    </TooltipContent>
-                )}
-            </Tooltip>
+            {showButton &&
+                <Tooltip delayDuration={200}>
+                    <TooltipTrigger asChild>
+                        <div className="mt-4 w-2/3 mx-auto">
+                            <SpotentiateButton />
+                        </div>
+                    </TooltipTrigger>
+                    {showTooltip && (
+                        <TooltipContent side="top" className="z-50 my-2 shadow-xl border border-border bg-card">
+                            <p className="text-primary">{getToolTipmMsg()}</p>
+                        </TooltipContent>
+                    )}
+                </Tooltip>
+            }
+
         </Accordion >
     );
 }

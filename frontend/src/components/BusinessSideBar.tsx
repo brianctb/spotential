@@ -3,26 +3,15 @@
 import {
     Sidebar,
     SidebarContent,
-    SidebarGroup,
-    SidebarGroupLabel,
-    SidebarGroupContent,
     SidebarHeader
 } from "@/components/ui/sidebar";
-import {
-    Tabs,
-    TabsList,
-    TabsTrigger,
-    TabsContent
-} from "@/components/ui/tabs";
-import { BusinessCategoryAccordion } from "@/components/tabs/BusinessCategoryAccordion";
-import { DemographicsAccordion } from "@/components/tabs/DemographicsAccordion";
+
 import { ModeToggle } from "./ModeSwitch";
 import { useTheme } from "next-themes";
+import { BusinessAnalysisContent } from "./BusinessAnalysisContent";
 
 export const BusinessSidebar = () => {
 
-    const businessTabId = "businessTypes";
-    const demographicsTabId = "demographics";
     const { theme, setTheme } = useTheme()
 
     return (
@@ -37,30 +26,7 @@ export const BusinessSidebar = () => {
             </SidebarHeader>
 
             <SidebarContent className="bg-background">
-                <Tabs defaultValue={businessTabId} className="w-full">
-                    <TabsList variant="line" className="w-full flex justify-center">
-                        <TabsTrigger value={businessTabId}>Business Types</TabsTrigger>
-                        <TabsTrigger value={demographicsTabId}>Demographics</TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value={businessTabId}>
-                        <SidebarGroup>
-                            <SidebarGroupContent>
-                                <BusinessCategoryAccordion />
-                            </SidebarGroupContent>
-                        </SidebarGroup>
-                    </TabsContent>
-
-                    <TabsContent value={demographicsTabId}>
-                        <SidebarGroup>
-                            <SidebarGroupContent>
-                                <DemographicsAccordion />
-                            </SidebarGroupContent>
-                        </SidebarGroup>
-                    </TabsContent>
-                </Tabs>
-
-
+                <BusinessAnalysisContent />
             </SidebarContent>
         </Sidebar>
     );
