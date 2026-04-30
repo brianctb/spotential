@@ -14,7 +14,6 @@ async def lifespan(fastapi_app: FastAPI):
     fastapi_app.state.http_client = http_client
     fastapi_app.state.model = load_ml_model()
     yield
-    del fastapi_app.state.model
     await http_client.aclose()
 
 
