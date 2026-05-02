@@ -38,23 +38,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/locations/businesses": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Businesses */
-        get: operations["get_businesses_locations_businesses_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/locations/analysis": {
         parameters: {
             query?: never;
@@ -151,19 +134,6 @@ export interface components {
             tract_stats: components["schemas"]["TractStats"];
             demographics: components["schemas"]["CensusDemographicsBase"];
         };
-        /** Business */
-        Business: {
-            /** Id */
-            id: number;
-            /** Lat */
-            lat: number;
-            /** Lng */
-            lng: number;
-            /** Name */
-            name: string;
-            business_type: components["schemas"]["BusinessType"];
-            business_category: components["schemas"]["BusinessCategory"];
-        };
         /** BusinessBase */
         BusinessBase: {
             /** Osm Id */
@@ -231,12 +201,13 @@ export interface components {
             /** Label */
             label: string;
         };
-        /** BusinessesResponse */
-        BusinessesResponse: {
-            /** Businesses */
-            businesses: components["schemas"]["Business"][];
-            /** Count */
-            count: number;
+        /** BusinessWithGeometry */
+        BusinessWithGeometry: {
+            business: components["schemas"]["BusinessBase"];
+            /** Geometry */
+            geometry: {
+                [key: string]: unknown;
+            };
         };
         /** CensusDemographicsBase */
         CensusDemographicsBase: {
@@ -380,41 +351,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_businesses_locations_businesses_get: {
-        parameters: {
-            query: {
-                business_type: components["schemas"]["BusinessType"];
-                lat: number;
-                lng: number;
-                radius?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BusinessesResponse"];
+                    "application/json": components["schemas"]["BusinessWithGeometry"][];
                 };
             };
             /** @description Validation Error */
