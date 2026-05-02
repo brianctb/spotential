@@ -5,6 +5,7 @@ from config.business_type import BusinessCategory
 from service.BusinessService import BusinessService
 from dependencies import get_business_service
 from typing import Optional
+from schema.business import BusinessWithGeometry
 
 router = APIRouter(prefix="/business", tags=["business"])
 
@@ -32,7 +33,7 @@ async def get_menu():
     return categories
 
 
-@router.get("/tract/{tract_id}")
+@router.get("/tract/{tract_id}", response_model=list[BusinessWithGeometry])
 async def get_business_from_tract(
         tract_id: str,
         business_type: Optional[BusinessType] = None,

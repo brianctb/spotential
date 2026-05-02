@@ -1,7 +1,6 @@
 from enum import Enum
 from pydantic import BaseModel
 
-# OVERPASS_URL = "http://overpass-api.de/api/interpreter"
 OVERPASS_URL = "https://overpass.private.coffee/api/interpreter"
 
 

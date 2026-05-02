@@ -7,6 +7,10 @@ from routers.census import router as census_router
 import httpx
 from config.mlflow_config import MODELS_PATH, LOCAL_MODEL_NAME
 import joblib
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 @asynccontextmanager
@@ -25,7 +29,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[os.getenv('FRONTEND_URL')],
     allow_methods=["*"],
     allow_headers=["*"],
 )
