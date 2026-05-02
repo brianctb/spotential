@@ -5,14 +5,15 @@ from routers.business import router as business_router
 from routers.location import router as location_router
 from routers.census import router as census_router
 import httpx
-from config.mlflow_config import load_ml_model
+from config.mlflow_config import MODELS_PATH, LOCAL_MODEL_NAME
+import joblib
 
 
 @asynccontextmanager
 async def lifespan(fastapi_app: FastAPI):
     http_client = httpx.AsyncClient()
     fastapi_app.state.http_client = http_client
-    fastapi_app.state.model = load_ml_model()
+    fastapi_app.state.model = joblib.load(MODELS_PATH / LOCAL_MODEL_NAME)
     yield
     await http_client.aclose()
 
