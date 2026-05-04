@@ -23,9 +23,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     title: "Spotential",
-    description: "A business location analysis tool that helps entrepreneurs find the best location for their business.",
+    description: "A business location tool that helps entrepreneurs find the best location for their business.",
     siteName: "Spotential",
-    images: ["/spotential-icon.svg"]
+    images: ["/spotential-icon.png"]
   }
 };
 
