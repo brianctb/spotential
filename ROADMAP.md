@@ -49,16 +49,16 @@
 - [x] **UI Upgrade:** Add animation for fetching, and delay
 - [x] **UI Feature:** Add disable Tooltip and error sonner
 - [x] **UI Feature:** Add Dark Mode and mode trigger
-- [ ] **UI Feature:** Add UI for mobile/small screen view
+- [x] **UI Feature:** Add UI for mobile/small screen view
 - [x] **UI Feature:** Add darkmode for map style
 
 ---
 
 ## Phase 4: Deployment
 
-- [ ] **Docker:** Docker containerize app
-- [ ] **Deployment:** Frontend on Vercel, Backend on Fly.io, custom domain `spotential.dev`.
-- [ ] **Showcase:** Record demo video and create architecture diagrams for portfolio.
+- [x] **Docker:** Docker containerize app
+- [x] **Deployment:** Deploy frontend and backend, with a custom domain
+- [ ] **Showcase:** Record demo video
 
 ---
 
@@ -76,5 +76,5 @@
 ## Technical Debt & Tooling
 
 - [x] Add `DATABASE_URL` to `.env` (Use `sslmode=require`).
-- [ ] Install dependencies: `uv add asyncpg psycopg2-binary geopandas`.
+- [x] Install dependencies: `uv add asyncpg psycopg2-binary geopandas`.
 - [x] Configure `env.py` from alembic to point to Neon.
