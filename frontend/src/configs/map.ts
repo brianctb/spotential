@@ -1,7 +1,7 @@
 export const MAP_CONFIG = {
     mapStyle: "https://tiles.openfreemap.org/styles/liberty",
     // Dark mode option (currently unused, but can be switched to for a different aesthetic)
-    darkMapStyle: "https://tiles.stadiamaps.com/styles/alidade_smooth_dark.json",
+    darkMapStyle: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
     vancouver: {
         bounds: [
             [-123.30, 49.10],
