@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from 'react';
 import { useMap } from "react-map-gl/maplibre"; // Or 'react-map-gl'
 import { cn } from "@/lib/utils";

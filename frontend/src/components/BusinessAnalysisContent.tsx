@@ -4,7 +4,6 @@ import {
     TabsTrigger,
     TabsContent
 } from "./ui/tabs"
-
 import { BusinessCategoryAccordion } from "./tabs/BusinessCategoryAccordion";
 import { DemographicsAccordion } from "./tabs/DemographicsAccordion";
 import { useIsMobile } from "@/hooks/use-mobile";

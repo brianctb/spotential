@@ -9,7 +9,6 @@ import { PinLocation, useMapStore } from "@/store/mapStore";
 import { TractLayer } from "./TractLayer";
 import { BusinessLayer } from "./BusinessLayer";
 import { useAnalysisQuery } from "@/hooks/useAnalysisQuery";
-import { useSearchParams } from "next/navigation";
 import { SearchPin } from "./PinMarker/SearchPin";
 import { BusinessBase } from "@/types/business";
 import { BusinessPopUp } from "./BusinessPopUp";
@@ -20,17 +19,18 @@ import { Theme } from "../ModeSwitch";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAppParams } from "@/hooks/useAppParam";
 
 export const SpotentialMap = () => {
     const isMobile = useIsMobile()
     const { data: analysis, error } = useAnalysisQuery();
-    const searchParams = useSearchParams();
+    const { lat, lng } = useAppParams();
 
     // state
     const [selectedBusiness, setSelectedBusiness] = useState<BusinessBase | null>(null);
     const [bizPopupCoords, setBizPopupCoords] = useState<PinLocation | null>(null);
     const [mapTheme, setMapTheme] = useState<Theme>('light');
-    const { theme, setTheme } = useTheme()
+    const { theme } = useTheme()
     const setDraftPinLocation = useMapStore((state) => state.setDraftPin);
     const draftPinLocation = useMapStore((state) => state.draftPin);
     const canShowAnalysis = useMapStore((state) => state.canShowAnalysis)
@@ -39,10 +39,8 @@ export const SpotentialMap = () => {
 
     // map setup
     const mapRef = useRef<MapRef>(null);
-    const searchLat = Number(searchParams.get("lat"));
-    const searchLng = Number(searchParams.get("lng"));
-    const initialView = (searchLat && searchLng)
-        ? { latitude: searchLat, longitude: searchLng, zoom: MAP_CONFIG.defaultZoom } // Use search params if they exist
+    const initialView = (lat && lng)
+        ? { latitude: lat, longitude: lng, zoom: MAP_CONFIG.defaultZoom } // Use search params if they exist
         : MAP_CONFIG.vancouver.center;
 
     const { flyToLocation } = useMapView(mapRef);
@@ -112,8 +110,8 @@ export const SpotentialMap = () => {
     }
 
     useEffect(() => {
-        flyToLocation(searchLat, searchLng);
-    }, [analysis, searchLat, searchLng]);
+        flyToLocation(lat, lng);
+    }, [analysis, lat, lng]);
 
     useEffect(() => {
         if (error && !hasToastedRef.current) {
@@ -156,8 +154,8 @@ export const SpotentialMap = () => {
                     <PinMarker lng={draftPinLocation.lng} lat={draftPinLocation.lat} />
                 )}
 
-                {searchLat && searchLng && (
-                    <SearchPin lng={searchLng} lat={searchLat} />
+                {lat && lng && (
+                    <SearchPin lng={lng} lat={lat} />
                 )}
 
                 {analysis && canShowAnalysis && (

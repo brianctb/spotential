@@ -22,8 +22,8 @@ import {
     LucideIcon
 } from "lucide-react";
 import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
 import { useBusinessMetadata } from "@/hooks/useBusinessMeta";
+import { useAppParams } from "@/hooks/useAppParam";
 
 const CATEGORY_ICONS: Record<BusinessCategory, LucideIcon> = {
     "food & drink": Utensils,
@@ -103,32 +103,24 @@ export const BusinessCategoryAccordion = ({
 }: {
     showButton?: boolean;
 }) => {
-    const searchParams = useSearchParams()
+    const { selectedType: urlSelectedType } = useAppParams()
     const businessMeta = useBusinessMetadata()
-    const draftPinLocation = useMapStore((state) => state.draftPin);
     const selectedType = useMapStore((state) => state.selectedType)
     const setSelectedType = useMapStore((state) => state.setSelectedType)
 
     const { data: menu, isLoading } = useMenuQuery();
 
-    const getToolTipmMsg = () => {
-        if (!selectedType && !draftPinLocation) return "Select a category and place a pin.";
-        if (!selectedType) return "Please select a business category.";
-        if (!draftPinLocation) return "Please place a pin on the map.";
-    };
-
     useEffect(() => {
         if (businessMeta.size === 0) return;
 
-        const urlType = searchParams.get("business_type");
-        if (urlType && businessMeta.has(urlType)) {
-            if (urlType !== selectedType) {
-                setSelectedType(urlType as BusinessType);
+        if (urlSelectedType && businessMeta.has(urlSelectedType)) {
+            if (urlSelectedType !== selectedType) {
+                setSelectedType(urlSelectedType as BusinessType);
             }
-        } else if (urlType) {
-            console.warn(`Invalid business type: ${urlType}`);
+        } else if (urlSelectedType) {
+            console.warn(`Invalid business type: ${urlSelectedType}`);
         }
-    }, [searchParams, businessMeta]);
+    }, [urlSelectedType, businessMeta]);
 
     if (isLoading) return <div className="p-4 text-sm text-muted-foreground animate-pulse">Loading...</div>;
 
