@@ -1,3 +1,5 @@
+"use client";
+
 import { BusinessType, BusinessCategory } from "@/types/business";
 import {
     Accordion,
@@ -5,11 +7,6 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useMapStore } from "@/store/mapStore";
