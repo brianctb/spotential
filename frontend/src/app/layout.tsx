@@ -20,6 +20,13 @@ export const metadata: Metadata = {
   icons: {
     icon: '/spotential-icon.svg'
   },
+  openGraph: {
+    type: "website",
+    title: "Spotential",
+    description: "A business location analysis tool that helps entrepreneurs find the best location for their business.",
+    siteName: "Spotential",
+    images: ["/spotential-icon.svg"]
+  }
 };
 
 export default function RootLayout({
