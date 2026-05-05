@@ -20,7 +20,7 @@ export const BusinessDrawer = () => {
             modal={false}
         >
             <Drawer.Portal>
-                <Drawer.Content className="bg-background fixed bottom-0 left-0 right-0 flex flex-col rounded-t-[24px] h-svh z-50">
+                <Drawer.Content className="overscroll-contain bg-background fixed bottom-0 left-0 right-0 flex flex-col rounded-t-[24px] h-svh z-50">
 
                     <div className="pt-3 pb-2">
                         {/* the drag button */}
@@ -38,7 +38,7 @@ export const BusinessDrawer = () => {
                     <div
                         // leaving this div to scroll for content
                         data-vaul-no-drag
-                        className="flex-1 min-h-0 pt-3 h-full overflow-y-auto px-3 pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
+                        className="flex-1 min-h-0 pt-3 overflow-y-auto px-3 pb-[calc(1.5rem+env(safe-area-inset-bottom))] touch-pan-y"
                     >
                         <BusinessAnalysisContent />
                     </div>
