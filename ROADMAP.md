@@ -27,7 +27,6 @@
 - [x] **Database Schema:** Define `CensusTract` and `CensusDemographics` via **SQLModel**.
 - [x] **Migrations:** Initialize **Alembic** and run first migration to create tables.
 - [x] **Spatial Logic:** Build `CensusService` to find tract by Lat/Lng via `ST_Contains`.
-- [ ] **Transit Layer:** Load TransLink GTFS stops; build proximity scoring (stops within 500m).
 - [x] **Unified API:** Build `GET` endpoint to return all data for a clicked point.
 - [x] **Display Tract and Business:** Maplibre to display Source and Layer for Tract
 
@@ -68,10 +67,16 @@
 
 - [ ] **Natural Language:** Integrate **Vercel AI SDK**; build chat interface for plain English queries.
 - [ ] **RAG Pipeline:** Use **pgvector** in Neon to embed neighborhood context for grounded AI answers.
-- [ ] **UX Polish:** Add Recharts bar charts for score breakdowns; implement mobile-responsive layout.
+- [ ] **UX Polish:** Add Recharts bar charts for score breakdowns;
 - [ ] **Reliability:** Complete **Pytest** coverage for backend and ML pipeline.
 
 ---
+
+## 6. Future Enhancement
+
+- Expand area available for analysis
+- Expand and refine business types, such as cuisine for resturant, for users to analyze
+- Comparison feature between tract
 
 ## Technical Debt & Tooling
 
