@@ -5,7 +5,7 @@ import { Drawer } from 'vaul';
 import { BusinessAnalysisContent } from "./BusinessAnalysisContent";
 import { SpotentiateButton } from './SpotentiateButton';
 
-const snapPoints = [0.1, 0.7, 0.9];
+const snapPoints = [0.12, 0.5, 0.9];
 
 export const BusinessDrawer = () => {
     const [snap, setSnap] = useState<number | string | null>(snapPoints[0]);
@@ -20,7 +20,7 @@ export const BusinessDrawer = () => {
             modal={false}
         >
             <Drawer.Portal>
-                <Drawer.Content className="bg-background fixed bottom-0 left-0 right-0 flex flex-col rounded-t-[24px] h-screen max-h-screen z-50">
+                <Drawer.Content className="bg-background fixed bottom-0 left-0 right-0 flex flex-col rounded-t-[24px] h-svh z-50">
 
                     <div className="pt-3 pb-2">
                         {/* the drag button */}
@@ -38,7 +38,7 @@ export const BusinessDrawer = () => {
                     <div
                         // leaving this div to scroll for content
                         data-vaul-no-drag
-                        className="flex-1 min-h-0 pt-3 h-full overflow-y-auto px-3"
+                        className="flex-1 min-h-0 pt-3 h-full overflow-y-auto px-3 pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
                     >
                         <BusinessAnalysisContent />
                     </div>
