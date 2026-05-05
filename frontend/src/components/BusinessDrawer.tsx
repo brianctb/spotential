@@ -38,7 +38,7 @@ export const BusinessDrawer = () => {
                     <div
                         // leaving this div to scroll for content
                         data-vaul-no-drag
-                        className="flex-1 min-h-0 h-full overflow-y-auto px-3 pb-[max(6rem,env(safe-area-inset-bottom))]"
+                        className="flex-1 min-h-0 pt-3 h-full overflow-y-auto px-3"
                     >
                         <BusinessAnalysisContent />
                     </div>
