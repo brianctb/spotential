@@ -41,6 +41,7 @@ export const ModeToggle = ({
             checked={isDark}
             onCheckedChange={(checked) => onThemeChange(checked ? "dark" : "light")}
             className={cn(
+                "after:hidden",
                 // Ensure thumb is a flex container for the icon
                 "**:data-[slot=switch-thumb]:flex **:data-[slot=switch-thumb]:items-center **:data-[slot=switch-thumb]:justify-center",
                 // Apply custom thumb overrides if provided

@@ -10,12 +10,14 @@ interface MapStore {
     selectedType: BusinessType | null;
     searchPin: PinLocation | null;
     draftPin: PinLocation | null;
-    canShowAnalysis: boolean
+    canShowAnalysis: boolean;
+    infoDialogOpen: boolean;
 
     setSelectedType: (type: BusinessType | null) => void;
     setDraftPin: (location: PinLocation | null) => void;
     setSearchPin: (location: PinLocation | null) => void;
-    setCanShowAnalysis: (value: boolean) => void
+    setCanShowAnalysis: (value: boolean) => void;
+    setInfoDialogOpen: (value: boolean) => void;
     reset: () => void;
 }
 
@@ -23,7 +25,8 @@ const initialState = {
     selectedType: null,
     searchPin: null,
     draftPin: null,
-    canShowAnalysis: true
+    canShowAnalysis: true,
+    infoDialogOpen: false
 };
 
 export const useMapStore = create<MapStore>((set) => ({
@@ -33,5 +36,6 @@ export const useMapStore = create<MapStore>((set) => ({
     setDraftPin: (location) => set({ draftPin: location }),
     setSearchPin: (location) => set({ searchPin: location }),
     setCanShowAnalysis: (value) => set({ canShowAnalysis: value }),
+    setInfoDialogOpen: (value) => set({ infoDialogOpen: value }),
     reset: () => set(initialState),
 }));
