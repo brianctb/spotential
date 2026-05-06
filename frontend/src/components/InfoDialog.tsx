@@ -107,16 +107,24 @@ export function InfoDialog({ open, onOpenChange }: InfoDialogProps) {
                     <Separator className="opacity-50" />
 
                     {/* Developer Info */}
-                    <div className="flex items-center justify-between group">
+                    <div className="flex items-center justify-between">
                         <div className="space-y-1">
                             <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
                                 <User className="h-3 w-3" />
                                 <span>Developer</span>
                             </div>
-                            <p className="text-base font-bold">Brian Lee</p>
+                            <a
+                                href="https://brianctb.dev"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-base font-bold flex items-center gap-1.5 text-foreground hover:text-primary transition-colors"
+                            >
+                                Brian Lee
+                                <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/90" />
+                            </a>
                         </div>
-                        <p className="text-[11px] text-muted-foreground text-right max-w-50 leading-tight italic">
-                            Exploring high-performance geospatial architectures.
+                        <p className="text-[11px] text-muted-foreground text-right max-w-45 leading-tight italic">
+                            Exploring high-performance geospatial architectures and ML inference.
                         </p>
                     </div>
 
