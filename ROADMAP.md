@@ -61,25 +61,13 @@
 
 ---
 
-## Phase 5: GenAI Layer & Production Polish
+## Phase 5: Agentic Layer
 
-**Goal:** Natural language queries and professional deployment.
+**Goal:** Transform Spotential from a data dashboard into an autonomous business consulting service.
 
-- [ ] **Natural Language:** Integrate **Vercel AI SDK**; build chat interface for plain English queries.
-- [ ] **RAG Pipeline:** Use **pgvector** in Neon to embed neighborhood context for grounded AI answers.
-- [ ] **UX Polish:** Add Recharts bar charts for score breakdowns;
-- [ ] **Reliability:** Complete **Pytest** coverage for backend and ML pipeline.
-
----
-
-## 6. Future Enhancement
-
-- Expand area available for analysis
-- Expand and refine business types, such as cuisine for resturant, for users to analyze
-- Comparison feature between tract
-
-## Technical Debt & Tooling
-
-- [x] Add `DATABASE_URL` to `.env` (Use `sslmode=require`).
-- [x] Install dependencies: `uv add asyncpg psycopg2-binary geopandas`.
-- [x] Configure `env.py` from alembic to point to Neon.
+- [ ] **Multi-Agent Orchestration (CrewAI):** Deploy specialized agents that collaborate to solve complex location queries:
+  - **Geospatial Researcher:** Uses **LangChain Tools** to scan PostGIS metrics and transit data.
+  - **ML Data Scientist:** Triggers XGBoost inference and interprets feature importance.
+  - **Business Strategist:** Synthesizes technical outputs into a narrative analysis.
+- [ ] **Agentic RAG Pipeline:** Implement semantic search via **pgvector** and **LangChain** to retrieve qualitative neighborhood context to ground quantitative recommendations.
+- [ ] **Streaming Agent UI:** Integrate **Vercel AI SDK** to stream the "thought process" and delegation logs of the agents to the frontend for full reasoning transparency.

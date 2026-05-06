@@ -22,7 +22,7 @@ To maintain statistical integrity, all data is synchronized to the **Census Trac
 - **Data Points:** Median Income, Total Population, Population Density, Average Age, Other Businesses Count
 - **Reference:** Model features can be found in ml_model.py under scehma package
 
-### B. Target ($y$) - The "Ground Truth"
+### B. Target ($y$) - The Existing Business
 
 - **Data Point:** Total business count for a specific type found within the boundaries of that specific Tract.
 
