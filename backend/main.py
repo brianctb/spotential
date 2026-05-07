@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 # defining the rules for the limiter first so decorator can be used on routes
-limiter = Limiter(key_func=get_remote_address, default_limits=["5/minute", "100/day"])
+limiter = Limiter(key_func=get_remote_address, default_limits=["8/minute", "50/day"])
 
 
 @asynccontextmanager
