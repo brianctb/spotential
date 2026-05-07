@@ -9,7 +9,21 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { LucideIcon, ExternalLink, Bug, Cpu, Database, User, Layers, MousePointer2 } from "lucide-react";
+// Added Rocket, Brain, Compass, and GitCompare icons
+import {
+    LucideIcon,
+    ExternalLink,
+    Bug,
+    Cpu,
+    Database,
+    User,
+    Layers,
+    MousePointer2,
+    Rocket,
+    Brain,
+    Compass,
+    GitCompare
+} from "lucide-react";
 import { SpotentialLogo } from "./SpotentialLogo";
 
 type InfoDialogProps = {
@@ -20,17 +34,28 @@ type InfoDialogProps = {
 interface FeatureItemProps {
     icon: LucideIcon;
     title: string;
-    description: string;
+    description?: string;
+    isComingSoon?: boolean; // Added for roadmap items
 }
 
-const FeatureItem = ({ icon: Icon, title, description }: FeatureItemProps) => (
+const FeatureItem = ({ icon: Icon, title, description, isComingSoon }: FeatureItemProps) => (
     <div className="flex gap-4">
-        <Icon className="h-6 w-6 text-muted-foreground shrink-0 mt-0.5" />
+        <Icon className={`h-6 w-6 shrink-0 mt-0.5 ${isComingSoon ? 'text-primary/60' : 'text-muted-foreground'}`} />
         <div className="space-y-1">
-            <h4 className="text-base font-bold text-foreground">{title}</h4>
-            <p className="text-sm text-muted-foreground leading-snug">
-                {description}
-            </p>
+            <div className="flex items-center gap-2">
+                <h4 className="text-base font-bold text-foreground">{title}</h4>
+                {isComingSoon && (
+                    <span className="text-[10px] font-black uppercase tracking-tighter bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+                        Soon
+                    </span>
+                )}
+            </div>
+            {description &&
+                <p className="text-sm text-muted-foreground leading-snug">
+                    {description}
+                </p>
+            }
+
         </div>
     </div>
 );
@@ -38,7 +63,7 @@ const FeatureItem = ({ icon: Icon, title, description }: FeatureItemProps) => (
 export function InfoDialog({ open, onOpenChange }: InfoDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-[95vw] sm:max-w-150 max-h-[70vh] overflow-y-auto border-border/40 shadow-2xl p-8">
+            <DialogContent className="w-[95vw] sm:max-w-150 max-h-[85vh] overflow-y-auto border-border/40 shadow-2xl p-8">
                 <DialogHeader className="space-y-2">
                     <DialogTitle className="text-3xl font-bold flex items-center gap-3">
                         <SpotentialLogo />
@@ -55,7 +80,7 @@ export function InfoDialog({ open, onOpenChange }: InfoDialogProps) {
                             The name is a simple equation: <strong>Spot + Potential</strong>.
                         </p>
                         <p className="text-base leading-relaxed text-muted-foreground">
-                            This platform was built to help entrepreneurs instantly evaluate the
+                            Built to help entrepreneurs evaluate the
                             <strong> potential of a spot</strong> by synthesizing geospatial
                             intelligence and machine learning.
                         </p>
@@ -106,6 +131,36 @@ export function InfoDialog({ open, onOpenChange }: InfoDialogProps) {
 
                     <Separator className="opacity-50" />
 
+                    {/* Future Roadmap Section */}
+                    <div className="space-y-6">
+                        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground/80">
+                            <Rocket className="h-4 w-4" />
+                            <span>Future Roadmap</span>
+                        </div>
+
+                        <div className="grid gap-6">
+                            <FeatureItem
+                                icon={Brain}
+                                isComingSoon
+                                title="Agentic Consulting"
+                            />
+                            <FeatureItem
+                                icon={Compass}
+                                isComingSoon
+                                title="Granular Sub-Categories"
+                                description="Refining analysis for specific niches, such as cuisine-level restaurant detection."
+                            />
+                            <FeatureItem
+                                icon={GitCompare}
+                                isComingSoon
+                                title="Comparative Benchmarking"
+                                description="Side-by-side evaluation of multiple census tracts to identify the highest ROI location."
+                            />
+                        </div>
+                    </div>
+
+                    <Separator className="opacity-50" />
+
                     {/* Developer Info */}
                     <div className="flex items-center justify-between">
                         <div className="space-y-1">
@@ -124,7 +179,7 @@ export function InfoDialog({ open, onOpenChange }: InfoDialogProps) {
                             </a>
                         </div>
                         <p className="text-[11px] text-muted-foreground text-right max-w-45 leading-tight italic">
-                            Exploring high-performance geospatial architectures and ML inference.
+                            Exploring high-performance geospatial architectures and AI agents.
                         </p>
                     </div>
 
