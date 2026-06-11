@@ -13,6 +13,12 @@ class CensusTract(SQLModel, table=True):
         sa_column=Column(Geometry("MULTIPOLYGON", srid=4326, spatial_index=False))
     )
 
+    # geography of tracts
+    country_id: Optional[int] = Field(default=None, foreign_key="countries.id")
+    state_id: Optional[int] = Field(default=None, foreign_key="states.id")
+    city_id: Optional[int] = Field(default=None, foreign_key="cities.id")
+    neighbourhood_id: Optional[int] = Field(default=None, foreign_key="neighbourhoods.id")
+
 class CensusDemographicsBase(SQLModel):
     tract_id: str = Field(foreign_key="census_tracts.tract_id", unique=True)
     population: Optional[int] = None

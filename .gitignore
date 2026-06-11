@@ -15,6 +15,7 @@ frontend/.turbo/
 .env.production
 **/.env
 **/.env.local
+**/.env.dev
 
 # ML artifacts — too large for git
 backend/ml_models/

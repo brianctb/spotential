@@ -8,6 +8,7 @@ from alembic import context
 from dotenv import load_dotenv
 from models.census import CensusDemographics, CensusTract
 from models.business import Business
+from models.geography import Country, State, City, Neighbourhood
 from sqlmodel import SQLModel
 import os
 
