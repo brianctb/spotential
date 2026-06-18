@@ -35,3 +35,16 @@ class CensusService:
         demo = CensusDemographicsBase.model_validate(demo)
 
         return demo, json.loads(geojson_str)
+
+    def get_all_tracts(self) -> list[tuple[str, CensusDemographicsBase]]:
+        stmt = select(CensusTract.tract_id, CensusDemographics).join(
+            CensusDemographics,
+            CensusTract.tract_id == CensusDemographics.tract_id
+        )
+
+        results = self.session.exec(stmt).all()
+
+        return [
+            (tract_id, CensusDemographicsBase.model_validate(demo))
+            for tract_id, demo in results
+        ]

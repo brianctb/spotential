@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from models.census import CensusDemographics, CensusTract
 from models.business import Business
 from models.geography import Country, State, City, Neighbourhood
+from models.model_outputs import ModelPrediction
 from sqlmodel import SQLModel
 import os
 
