@@ -1,9 +1,8 @@
-from sqlmodel import Session, delete
+from sqlmodel import Session
 from db import engine
 from service.CensusService import CensusService
 from service.BusinessService import BusinessService
-from service.AnalysisService import AnalysisService
-from models.model_outputs import ModelPrediction
+from service.PredictionService import PredictionService
 import joblib
 from pathlib import Path
 
@@ -15,25 +14,21 @@ def main():
         model_path = base / "models" / "production_model.pkl"
         model = joblib.load(model_path)
 
-        analysis_service = AnalysisService(
+        prediction_service = PredictionService(
+            session=session,
+            model=model,
             business_service=business_service,
             census_service=census_service,
-            model=model
         )
 
-        predictions = analysis_service.precompute_all_predictions()
+        predictions = prediction_service.precompute_all_predictions()
 
         if not predictions:
             print("No predictions to save.")
             return
 
-        print("Clearing old predictions...")
-        session.exec(delete(ModelPrediction))
-        session.commit()
-
-        print(f"Inserting {len(predictions)} predictions...")
-        session.add_all(predictions)
-        session.commit()
+        print(f"Saving {len(predictions)} predictions...")
+        prediction_service.save_predictions(predictions)
 
     print("Done.")
 
