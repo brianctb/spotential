@@ -19,7 +19,7 @@ class BusinessBase(SQLModel):
     lat: float
 
 class Business(BusinessBase, table=True):
-    __tablename__ = "business"
+    __tablename__ = "business"  # pyright: ignore[reportAssignmentType]
     id: Optional[int] = Field(default=None, primary_key=True)
     geom: Optional[str] = Field(
         sa_column=Column(Geometry("POINT", srid=4326, spatial_index=False))

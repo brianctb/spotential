@@ -82,7 +82,7 @@ def load_demographics(data_path: str, geo_path: str):
 
 
     # Wipe db and insert
-    engine = create_engine(os.getenv("DATABASE_URL"))
+    engine = create_engine(os.environ["DATABASE_URL"])
     records = wide.to_dicts()
 
     print(f"Uploading {len(records)} Vancouver records...")

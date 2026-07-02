@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from config.business_type import BusinessType
 from schema.response import AnalysisResponse
-from service.OSMService import OSMService
 from service.AnalysisService import AnalysisService
-from dependencies import get_osm_service, get_analysis_service
+from dependencies import get_analysis_service
 
 router = APIRouter(prefix="/locations", tags=["locations"])
 

@@ -9,7 +9,7 @@ import os
 
 load_dotenv()
 
-engine = create_engine(os.getenv("DATABASE_URL"))
+engine = create_engine(os.environ["DATABASE_URL"])
 
 VANCOUVER_BOUNDS = (
     (-123.30, 49.10),  # west, south

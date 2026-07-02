@@ -7,7 +7,7 @@ import pandas as pd
 from models.census import CensusTract
 
 load_dotenv()
-engine = create_engine(os.getenv("DATABASE_URL"))
+engine = create_engine(os.environ["DATABASE_URL"])
 
 pd.set_option('display.max_columns', None)  # Show all columns
 pd.set_option('display.width', 1000)        # Don't wrap lines

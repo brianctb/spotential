@@ -5,7 +5,7 @@ import os
 load_dotenv()
 
 engine = create_engine(
-    os.getenv("DATABASE_URL"),
+    os.environ["DATABASE_URL"],
     pool_pre_ping=True,
     pool_recycle=300
 )

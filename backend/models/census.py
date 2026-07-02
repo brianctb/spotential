@@ -5,7 +5,7 @@ from geoalchemy2 import Geometry
 
 
 class CensusTract(SQLModel, table=True):
-    __tablename__ = "census_tracts"
+    __tablename__ = "census_tracts"  # pyright: ignore[reportAssignmentType]
 
     id: Optional[int] = Field(default=None, primary_key=True)
     tract_id: str = Field(unique=True)
@@ -35,6 +35,6 @@ class CensusDemographicsBase(SQLModel):
     avg_household_size: Optional[float] = None
 
 class CensusDemographics(CensusDemographicsBase, table=True):
-    __tablename__ = "census_demographics"
+    __tablename__ = "census_demographics"  # pyright: ignore[reportAssignmentType]
     id: Optional[int] = Field(default=None, primary_key=True)
 

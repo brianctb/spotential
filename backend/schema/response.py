@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from schema.business import Business
 from models.census import CensusDemographicsBase
 from typing import Any
 from schema.geo_json import BusinessCollection, TractFeature
