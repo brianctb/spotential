@@ -1,4 +1,6 @@
 import mlflow
+import mlflow.tracking
+import mlflow.xgboost as mlflow_xgboost
 from pathlib import Path
 from dotenv import load_dotenv
 import os
@@ -48,7 +50,7 @@ def load_mlruns_model():
         raise RuntimeError(f"ML model load failed: {model_name}") from e
 
 
-def export_model(model_name: str = None, destination_path: Path = None):
+def export_model(model_name: str | None = None, destination_path: Path | None = None):
     mlflow.set_tracking_uri(DB_PATH)
     name = model_name or os.getenv("MODLE_NAME", "spotential-unified-model")
     out_dir = destination_path or MODELS_PATH
@@ -62,7 +64,7 @@ def export_model(model_name: str = None, destination_path: Path = None):
         logger.info(f"Connecting to MLflow at {DB_PATH}")
         logger.info(f"Exporting raw XGBoost model from: {model_uri}")
 
-        raw_model = mlflow.xgboost.load_model(model_uri)
+        raw_model = mlflow_xgboost.load_model(model_uri)
 
         joblib.dump(raw_model, dest_path)
         logger.info(f"Exported to {dest_path}")
