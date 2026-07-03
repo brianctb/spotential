@@ -4,6 +4,8 @@ export type BusinessType = components["schemas"]["BusinessType"];
 
 export type BusinessCategoryResponse = components["schemas"]["BusinessCategoryResponse"];
 
+export type BusinessTypeResponse = components["schemas"]["BusinessTypeResponse"];
+
 export type BusinessCollection = components["schemas"]["BusinessCollection"];
 
 export type BusinessBase = components["schemas"]["BusinessBase"];

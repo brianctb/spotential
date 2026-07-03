@@ -1,8 +1,10 @@
 "use client";
 
 import { forwardRef } from "react";
+import Image from "next/image";
 import { Marker } from "react-map-gl/maplibre";
 import { PinMarkerProps } from "@/types/PinMarker.type";
+import { cn } from "@/lib/utils";
 
 export const PinMarker = forwardRef<HTMLImageElement, PinMarkerProps>(({
     lng,
@@ -17,14 +19,19 @@ export const PinMarker = forwardRef<HTMLImageElement, PinMarkerProps>(({
         <Marker longitude={lng} latitude={lat} anchor="bottom">
             <div className="relative">
                 {overlay}
-                <img
-                    ref={ref}
-                    src={src}
-                    alt={alt}
-                    className={className}
-                    onClick={onClick}
-                />
+                <div className={cn("relative", className)}>
+                    <Image
+                        ref={ref}
+                        src={src}
+                        alt={alt}
+                        fill
+                        className="object-contain"
+                        onClick={onClick}
+                    />
+                </div>
             </div>
         </Marker>
     )
 });
+
+PinMarker.displayName = "PinMarker";

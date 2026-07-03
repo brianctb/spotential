@@ -108,8 +108,9 @@ export const DemographicsAccordion = () => {
                 title="Population"
                 icon={Users}
                 iconClassName="text-blue-500"
-                children={populationContent}
-            />
+            >
+                {populationContent}
+            </DemographicSection>
 
             {/* SECTION: ECONOMICS */}
             <DemographicSection
@@ -117,8 +118,9 @@ export const DemographicsAccordion = () => {
                 title="Economics"
                 icon={Landmark}
                 iconClassName="text-amber-500"
-                children={economicsContent}
-            />
+            >
+                {economicsContent}
+            </DemographicSection>
 
             {/* SECTION: EDUCATION */}
             <DemographicSection
@@ -126,8 +128,9 @@ export const DemographicsAccordion = () => {
                 title="Education"
                 icon={GraduationCap}
                 iconClassName="text-emerald-500"
-                children={educationContent}
-            />
+            >
+                {educationContent}
+            </DemographicSection>
 
             {/* SECTION: OPPORTUNITY */}
             <DemographicSection
@@ -135,8 +138,9 @@ export const DemographicsAccordion = () => {
                 title="Opportunity"
                 icon={Sparkle}
                 iconClassName="text-yellow-400"
-                children={opportunityContent}
-            />
+            >
+                {opportunityContent}
+            </DemographicSection>
 
         </Accordion>
     );

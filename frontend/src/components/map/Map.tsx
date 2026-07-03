@@ -1,7 +1,7 @@
 "use client";
 
 import Map from "react-map-gl/maplibre";
-import type { MapLayerMouseEvent, MapRef, ViewStateChangeEvent } from "react-map-gl/maplibre";
+import type { MapLayerMouseEvent, MapRef } from "react-map-gl/maplibre";
 import { PinMarker } from "@/components/map/PinMarker/PinMarker";
 import { useEffect, useRef, useState } from "react";
 import { MAP_CONFIG } from "@/configs/map";
@@ -88,7 +88,7 @@ export const SpotentialMap = () => {
         setDraftPinLocation({ lng, lat });
     }
 
-    const handleZoom = (e: ViewStateChangeEvent) => {
+    const handleZoom = () => {
         const map = mapRef.current?.getMap();
         if (!map || !selectedBusiness) return;
 
@@ -111,7 +111,7 @@ export const SpotentialMap = () => {
 
     useEffect(() => {
         flyToLocation(lat, lng);
-    }, [analysis, lat, lng]);
+    }, [analysis, lat, lng, flyToLocation]);
 
     useEffect(() => {
         if (error && !hasToastedRef.current) {

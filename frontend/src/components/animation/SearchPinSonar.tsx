@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useSyncExternalStore } from 'react';
 import { useMap } from "react-map-gl/maplibre"; // Or 'react-map-gl'
 import { cn } from "@/lib/utils";
 import { MAP_CONFIG } from '@/configs/map';
@@ -13,26 +13,30 @@ interface SearchPinSonarProps {
 
 export const SearchPinSonar = ({ isActive, onAnimationComplete, className }: SearchPinSonarProps) => {
     const { current: mapInstance } = useMap();
-    const [render, setRender] = useState(false);
-    const [zoom, setZoom] = useState(MAP_CONFIG.defaultZoom);
+    const [render, setRender] = useState(isActive);
 
     // use the map's zoom level to dynamically scale ring
-    useEffect(() => {
-        const map = mapInstance?.getMap();
-        if (!map) return;
-        setZoom(map.getZoom());
-        const onMove = () => setZoom(map.getZoom());
-        map.on("move", onMove);
+    const zoom = useSyncExternalStore(
+        (onChange) => {
+            const map = mapInstance?.getMap();
+            if (!map) return () => {};
+            // maplibre calls onChange on every "move" event, which tells React
+            // to re-run getSnapshot below and re-render if the zoom changed
+            map.on("move", onChange);
+            return () => map.off("move", onChange);
+        },
+        () => mapInstance?.getMap()?.getZoom() ?? MAP_CONFIG.defaultZoom, // getSnapshot: current zoom, read on demand
+        () => MAP_CONFIG.defaultZoom, // getServerSnapshot: fallback used during SSR
+    );
 
-        return () => {
-            map.off("move", onMove);
-        };
-    }, [mapInstance]);
+    // turning on: reflect the prop change immediately (no effect needed)
+    if (isActive && !render) {
+        setRender(true);
+    }
 
+    // turning off: keep rendering for the reverse animation, then unmount
     useEffect(() => {
-        if (isActive) {
-            setRender(true);
-        } else if (render) {
+        if (!isActive && render) {
             const timer = setTimeout(() => {
                 setRender(false);
                 onAnimationComplete?.();

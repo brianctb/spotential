@@ -110,12 +110,17 @@ export const BusinessCategoryAccordion = ({
 
     const { data: menu, isLoading } = useMenuQuery();
 
+    // syncs a business_type already present in the URL (shared link, back/forward
+    // nav, refresh) into the store's draft selection; store -> URL is handled
+    // separately, in SpotentiateButton's click handler
     useEffect(() => {
         if (businessMeta.size === 0) return;
 
+        const store = useMapStore.getState();
+
         if (urlSelectedType && businessMeta.has(urlSelectedType)) {
-            if (urlSelectedType !== selectedType) {
-                setSelectedType(urlSelectedType as BusinessType);
+            if (urlSelectedType !== store.selectedType) {
+                store.setSelectedType(urlSelectedType as BusinessType);
             }
         } else if (urlSelectedType) {
             console.warn(`Invalid business type: ${urlSelectedType}`);

@@ -26,8 +26,12 @@ export const ModeToggle = ({
 }: ModeToggleProps) => {
     const [mounted, setMounted] = useState(false)
 
-    // Avoid hydration mismatch
+    // Avoid hydration mismatch: render null on the server/first client render,
+    // then flip to the real switch once mounted. This deliberately relies on
+    // an extra client-only render, which is what the lint rule below is
+    // warning about — safe to ignore for this specific SSR pattern.
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true)
     }, [])
 
