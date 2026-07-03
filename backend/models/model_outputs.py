@@ -1,5 +1,4 @@
 from sqlmodel import SQLModel, Field
-from typing import Optional
 from config.business_type import BusinessType, BusinessCategory
 from sqlalchemy import Column, String
 
@@ -15,7 +14,7 @@ class ModelPrediction(SQLModel, table=True):
     business_category: BusinessCategory = Field(
         sa_column=Column(String)
     )
-    total_business_count: Optional[int] = None
-    actual_count: Optional[int] = None
-    predicted_count: Optional[float] = None
-    prediction_score: Optional[float] = None
+    total_business_count: int
+    actual_count: int
+    predicted_count: float
+    prediction_score: float

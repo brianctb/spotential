@@ -1,8 +1,10 @@
 from sqlmodel import Session, create_engine, text
+from sqlalchemy.sql.expression import UpdateBase
 from models.business import Business
 from models.census import CensusTract
 import os
 from dotenv import load_dotenv
+from typing import cast
 
 load_dotenv()
 engine = create_engine(os.environ["DATABASE_URL"])
@@ -17,7 +19,10 @@ def assign_tracts():
                              , b.geom);
                          """)
 
-        result = session.exec(statement)
+        # cast is typing-only (no-op at runtime): tells pyright to treat this
+        # TextClause as UpdateBase so exec()'s overload resolves to CursorResult,
+        # which has .rowcount.
+        result = session.exec(cast(UpdateBase, statement))
         rows_updated = result.rowcount
         session.commit()
 

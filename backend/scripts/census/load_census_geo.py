@@ -96,6 +96,8 @@ def get_or_create_neighbourhood(
 
 def enrich_tracts():
     with Session(engine) as session:
+        # Find tracts that haven't been geo-enriched yet (no country assigned)
+        # but do have geometry to compute a centroid from.
         stmt = select(
             CensusTract,
             func.ST_Y(func.ST_Centroid(CensusTract.geom)).label("lat"),
@@ -109,10 +111,14 @@ def enrich_tracts():
         print(f"Enriching {len(results)} tracts...")
 
         for i, row in enumerate(results):
+            tract: Optional[CensusTract] = None
             try:
-                tract: CensusTract = row[0]
+                tract = row[0]
                 lat: float = row[1]
                 lng: float = row[2]
+
+                # Reverse-geocode the tract's centroid via Nominatim to get
+                # country/state/city/neighbourhood names.
                 geo = reverse_geocode(lat, lng)
                 addr = extract_address(geo)
 
@@ -120,6 +126,8 @@ def enrich_tracts():
                     print(f"  Skipping {tract.tract_id} — no country returned")
                     continue
 
+                # Look up or create each geography level, falling back to the
+                # parent level's id when a level isn't present in the address.
                 country = get_or_create_country(
                     session, addr["country_name"], addr["country_code"]
                 )
@@ -142,6 +150,7 @@ def enrich_tracts():
                         city.id if city else None
                     )
 
+                # Link the tract to the resolved geography hierarchy.
                 tract.country_id = country.id
                 tract.state_id = state.id if state else None
                 tract.city_id = city.id if city else None
@@ -149,15 +158,19 @@ def enrich_tracts():
 
                 session.add(tract)
 
+                # Commit in batches of 10 rather than one-by-one or all at once.
                 if (i + 1) % 10 == 0:
                     session.commit()
                     print(f"  {i+1}/{len(results)} — {tract.tract_id}: "
                           f"{addr['neighbourhood']}, {addr['city']}")
 
+                # Stay under Nominatim's usage policy (max ~1 req/sec).
                 time.sleep(1.1)
 
             except Exception as e:
-                tract_id = tract.tract_id if 'tract' in locals() and tract else "unknown"
+                # Don't let one bad geocode/lookup abort the whole batch —
+                # roll back just this row's uncommitted changes and continue.
+                tract_id = tract.tract_id if tract else "unknown"
                 print(f"  Failed {tract_id}: {e}")
                 session.rollback()
                 time.sleep(2)

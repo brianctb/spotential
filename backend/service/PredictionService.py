@@ -27,7 +27,7 @@ class PredictionService:
         # this is to ensure the right ordering of features input into the model
         x_matrix = pd.DataFrame(
             [[x[f] for f in ModelFeatures.feature_columns()]],
-            columns=ModelFeatures.feature_columns()
+            columns=pd.Index(ModelFeatures.feature_columns())
         )
         pred = self.model.predict(x_matrix)[0]
         return max(0.0, float(pred))
@@ -36,7 +36,7 @@ class PredictionService:
         """Batch prediction — used by both single and batch precompute paths"""
         x = pd.DataFrame(
             [f.model_dump() for f in features_list],
-            columns=ModelFeatures.feature_columns()
+            columns=pd.Index(ModelFeatures.feature_columns())
         )
         raw_predictions = self.model.predict(x)
         return [max(0.0, float(p)) for p in raw_predictions]
@@ -67,7 +67,7 @@ class PredictionService:
         tracts = self.census_service.get_all_tracts()
 
         feature_rows = []
-        prediction_objects = []
+        prediction_meta = []
 
         print(f"Building features for {len(tracts)} tracts x {len(BusinessType)} types...")
 
@@ -88,16 +88,7 @@ class PredictionService:
                     **census_dict,
                 )
                 feature_rows.append(features)
-
-                prediction_objects.append(
-                    ModelPrediction(
-                        tract_id=tract_id,
-                        business_type=business_type.value,
-                        business_category=BUSINESS_CONFIGS[business_type].category.value,
-                        total_business_count=total_biz_count,
-                        actual_count=actual_count,
-                    )
-                )
+                prediction_meta.append((tract_id, business_type, total_biz_count, actual_count))
 
         if not feature_rows:
             return []
@@ -105,10 +96,20 @@ class PredictionService:
         print(f"Running batch prediction on {len(feature_rows)} rows...")
         predictions = self.predict_batch(feature_rows)
 
-        for prediction_obj, predicted_count in zip(prediction_objects, predictions):
-            prediction_obj.predicted_count = predicted_count
-            prediction_obj.prediction_score = self.score_tract(
-                prediction_obj.actual_count, predicted_count
+        prediction_objects = []
+        for (tract_id, business_type, total_biz_count, actual_count), predicted_count in zip(
+            prediction_meta, predictions
+        ):
+            prediction_objects.append(
+                ModelPrediction(
+                    tract_id=tract_id,
+                    business_type=business_type,
+                    business_category=BUSINESS_CONFIGS[business_type].category,
+                    total_business_count=total_biz_count,
+                    actual_count=actual_count,
+                    predicted_count=predicted_count,
+                    prediction_score=self.score_tract(actual_count, predicted_count),
+                )
             )
 
         return prediction_objects

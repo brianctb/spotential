@@ -1,6 +1,7 @@
 import polars as pl
 import xgboost as xgb
 import mlflow
+from mlflow.xgboost import log_model as log_xgboost_model
 from config.business_type import BUSINESS_CONFIGS
 from db import engine
 from sqlmodel import select
@@ -90,7 +91,7 @@ def train_unified_model(df: pl.DataFrame):
         "objective": "count:poisson",
     }
 
-    with mlflow.start_run(run_name=run_name) as parent_run:
+    with mlflow.start_run(run_name=run_name):
         mlflow.log_params(params)
 
         kf = KFold(n_splits=5, shuffle=True, random_state=42)
@@ -135,7 +136,7 @@ def train_unified_model(df: pl.DataFrame):
         final_model = xgb.XGBRegressor(**params)
         final_model.fit(X, y)
 
-        mlflow.xgboost.log_model(final_model, name="model")
+        log_xgboost_model(final_model, name="model")
         return final_model
 
 

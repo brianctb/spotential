@@ -1,5 +1,5 @@
 from models.census import CensusTract, CensusDemographics
-from sqlmodel import Session, func, select
+from sqlmodel import Session, col, func, select
 from schema.response import CensusDemographicsBase
 import json
 
@@ -39,7 +39,7 @@ class CensusService:
     def get_all_tracts(self) -> list[tuple[str, CensusDemographicsBase]]:
         stmt = select(CensusTract.tract_id, CensusDemographics).join(
             CensusDemographics,
-            CensusTract.tract_id == CensusDemographics.tract_id
+            col(CensusTract.tract_id) == col(CensusDemographics.tract_id)
         )
 
         results = self.session.exec(stmt).all()

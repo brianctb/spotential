@@ -6,7 +6,7 @@ from config.business_type import BusinessType, BusinessCategory
 
 class BusinessBase(SQLModel):
     osm_id: int = Field(unique=True, sa_type=BigInteger)
-    tract_id: Optional[str] = Field(foreign_key="census_tracts.tract_id", index=True)
+    tract_id: Optional[str] = Field(default=None, foreign_key="census_tracts.tract_id", index=True)
 
     name: str
     type: BusinessType = Field(index=True)
@@ -24,4 +24,3 @@ class Business(BusinessBase, table=True):
     geom: Optional[str] = Field(
         sa_column=Column(Geometry("POINT", srid=4326, spatial_index=False))
     )
-

@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
+from typing import cast
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.types import ExceptionHandler
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -37,11 +39,13 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[os.getenv('FRONTEND_URL')],
+    allow_origins=[os.environ['FRONTEND_URL']],
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(
+    RateLimitExceeded, cast(ExceptionHandler, _rate_limit_exceeded_handler)
+)
 # Middleware needed to actually blocks request if limiter is broken
 app.add_middleware(SlowAPIMiddleware)
 

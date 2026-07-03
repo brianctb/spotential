@@ -1,6 +1,6 @@
 from config.business_type import BusinessType
 from models.business import Business, BusinessBase
-from sqlmodel import Session, func, select
+from sqlmodel import Session, func, select, col
 from typing import Optional
 from schema.business import BusinessWithGeometry
 import json
@@ -45,7 +45,7 @@ class BusinessService:
         return businesses
 
     def get_total_biz_count_in_tract(self, tract_id: str) -> int:
-        stmt = select(func.count(Business.id)).where(
+        stmt = select(func.count(col(Business.id))).where(
             Business.tract_id == tract_id
         )
 
