@@ -6,19 +6,17 @@ import { Button } from "./ui/button";
 import { Sparkles } from "lucide-react";
 import { useMapStore } from "@/store/mapStore";
 import { useAnalysisQuery } from "@/hooks/useAnalysisQuery";
-import { useRouter } from "next/navigation";
+import { useCommitLocation } from "@/hooks/useCommitLocation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 export const SpotentiateButton = () => {
-    const router = useRouter();
     const isMobile = useIsMobile();
     const { isFetching } = useAnalysisQuery();
+    const commitLocation = useCommitLocation();
 
     const selectedType = useMapStore((state) => state.selectedType);
     const draftPinLocation = useMapStore((state) => state.draftPin);
-    const setDraftPinLocation = useMapStore((state) => state.setDraftPin);
-    const setCanShowAnalysis = useMapStore((state) => state.setCanShowAnalysis);
 
     const [isHovered, setIsHovered] = useState(false);
     const [mobileTooltipOpen, setMobileTooltipOpen] = useState(false);
@@ -41,13 +39,7 @@ export const SpotentiateButton = () => {
             return;
         }
 
-        const params = new URLSearchParams();
-        params.set("business_type", selectedType);
-        params.set("lat", draftPinLocation.lat.toString());
-        params.set("lng", draftPinLocation.lng.toString());
-        router.push(`?${params.toString()}`);
-        setDraftPinLocation(null);
-        setCanShowAnalysis(false);
+        commitLocation(selectedType, draftPinLocation.lat, draftPinLocation.lng);
     };
 
     const sparkleClass = "opacity-100 scale-125 text-yellow-400";

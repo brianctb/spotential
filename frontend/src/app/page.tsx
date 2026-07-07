@@ -7,6 +7,7 @@ import { BusinessDrawer } from "@/components/BusinessDrawer";
 import { SpotentialHeader } from "@/components/SpotentialHeader";
 import { Suspense } from "react";
 import { InfoDialog } from "@/components/InfoDialog";
+import { ChatSidePanel } from "@/components/ChatSidePanel";
 import { useMapStore } from "@/store/mapStore";
 
 export default function Home() {
@@ -20,6 +21,7 @@ export default function Home() {
         {!isMobile && <BusinessSidebar />}
         <SpotentialMap />
         {isMobile && <BusinessDrawer />}
+        {!isMobile && <ChatSidePanel />}
         <InfoDialog
           open={infoDialogOpen}
           onOpenChange={setInfoDialogOpen}
