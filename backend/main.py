@@ -26,7 +26,9 @@ async def lifespan(fastapi_app: FastAPI):
     http_client = httpx.AsyncClient()
     fastapi_app.state.http_client = http_client
     fastapi_app.state.model = joblib.load(MODELS_PATH / LOCAL_MODEL_NAME)
-    fastapi_app.state.anthropic_client = anthropic.AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    fastapi_app.state.anthropic_client = anthropic.AsyncAnthropic(
+        api_key=os.environ["ANTHROPIC_API_KEY"], timeout=30.0
+    )
     fastapi_app.state.limiter = limiter
     yield
     await http_client.aclose()
