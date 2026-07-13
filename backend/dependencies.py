@@ -1,10 +1,12 @@
 import httpx
+import anthropic
 from fastapi import Request, Depends
 from service.BusinessService import BusinessService
 from service.CensusService import CensusService
 from service.AnalysisService import AnalysisService
 from service.PredictionService import PredictionService
 from service.OSMService import OSMService
+from service.AgentService import AgentService
 from config.osm import OVERPASS_URL
 from sqlmodel import Session
 from db import engine
@@ -49,3 +51,14 @@ def get_analysis_service(
         prediction_service: PredictionService=Depends(get_prediction_service),
 ) -> AnalysisService:
     return AnalysisService(business_service, census_service, prediction_service)
+
+def get_anthropic_client(request: Request) -> anthropic.AsyncAnthropic:
+    return request.app.state.anthropic_client
+
+def get_agent_service(
+        prediction_service: PredictionService=Depends(get_prediction_service),
+        census_service: CensusService=Depends(get_census_service),
+        http_client: httpx.AsyncClient=Depends(get_http_client),
+        anthropic_client: anthropic.AsyncAnthropic=Depends(get_anthropic_client),
+) -> AgentService:
+    return AgentService(prediction_service, census_service, http_client, anthropic_client)

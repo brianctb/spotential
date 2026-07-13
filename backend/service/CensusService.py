@@ -36,6 +36,18 @@ class CensusService:
 
         return demo, json.loads(geojson_str)
 
+    def get_tract_centroids(self, tract_ids: list[str]) -> dict[str, tuple[float, float]]:
+        stmt = select(
+            CensusTract.tract_id,
+            func.ST_X(func.ST_Centroid(CensusTract.geom)),
+            func.ST_Y(func.ST_Centroid(CensusTract.geom)),
+        ).where(col(CensusTract.tract_id).in_(tract_ids))
+
+        return {
+            tract_id: (lng, lat)
+            for tract_id, lng, lat in self.session.exec(stmt).all()
+        }
+
     def get_all_tracts(self) -> list[tuple[str, CensusDemographicsBase]]:
         stmt = select(CensusTract.tract_id, CensusDemographics).join(
             CensusDemographics,

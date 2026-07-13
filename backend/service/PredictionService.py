@@ -1,6 +1,7 @@
 import math
+from typing import Literal
 import pandas as pd
-from sqlmodel import Session, delete, select
+from sqlmodel import Session, col, delete, select
 from xgboost import XGBRegressor
 from config.business_type import BusinessType, BUSINESS_CONFIGS
 from schema.ml_model import ModelFeatures
@@ -58,6 +59,22 @@ class PredictionService:
             ModelPrediction.business_type == business_type.value,
         )
         return self.session.exec(stmt).first()
+
+    def get_top_tracts(
+        self,
+        business_type: BusinessType,
+        limit: int,
+        order: Literal["asc", "desc"] = "desc",
+    ) -> list[ModelPrediction]:
+        capped_limit = min(limit, 5)
+        score_col = col(ModelPrediction.prediction_score)
+        stmt = (
+            select(ModelPrediction)
+            .where(ModelPrediction.business_type == business_type.value)
+            .order_by(score_col.desc() if order == "desc" else score_col.asc())
+            .limit(capped_limit)
+        )
+        return list(self.session.exec(stmt).all())
 
     def precompute_all_predictions(self) -> list[ModelPrediction]:
         """
