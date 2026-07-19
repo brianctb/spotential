@@ -12,6 +12,9 @@ from routers.location import router as location_router
 from routers.census import router as census_router
 from routers.agent import router as agent_router
 from config.mlflow_config import MODELS_PATH, LOCAL_MODEL_NAME
+from sqlmodel import Session, select
+from db import engine
+from models.geography import Country, State, City
 import anthropic
 import httpx
 import joblib
@@ -30,6 +33,15 @@ async def lifespan(fastapi_app: FastAPI):
         api_key=os.environ["ANTHROPIC_API_KEY"], timeout=30.0
     )
     fastapi_app.state.limiter = limiter
+
+    # Enum values for the agent's find_top_locations tool schema — sourced live
+    # from the DB (a byproduct of load_census_geo.py's reverse-geocoding
+    # ingestion), not hardcoded, so they never silently drift from real data.
+    with Session(engine) as session:
+        fastapi_app.state.supported_countries = sorted(session.exec(select(Country.name).distinct()).all())
+        fastapi_app.state.supported_states = sorted(session.exec(select(State.name).distinct()).all())
+        fastapi_app.state.supported_cities = sorted(session.exec(select(City.name).distinct()).all())
+
     yield
     await http_client.aclose()
 

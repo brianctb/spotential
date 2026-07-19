@@ -7,6 +7,7 @@ from service.AnalysisService import AnalysisService
 from service.PredictionService import PredictionService
 from service.OSMService import OSMService
 from service.AgentService import AgentService
+from service.GeographyService import GeographyService
 from config.osm import OVERPASS_URL
 from sqlmodel import Session
 from db import engine
@@ -55,10 +56,33 @@ def get_analysis_service(
 def get_anthropic_client(request: Request) -> anthropic.AsyncAnthropic:
     return request.app.state.anthropic_client
 
+def get_geography_service(session: Session = Depends(get_db_session)) -> GeographyService:
+    return GeographyService(session=session)
+
+def get_supported_countries(request: Request) -> list[str]:
+    return request.app.state.supported_countries
+
+def get_supported_states(request: Request) -> list[str]:
+    return request.app.state.supported_states
+
+def get_supported_cities(request: Request) -> list[str]:
+    return request.app.state.supported_cities
+
 def get_agent_service(
         prediction_service: PredictionService=Depends(get_prediction_service),
         census_service: CensusService=Depends(get_census_service),
-        http_client: httpx.AsyncClient=Depends(get_http_client),
+        geography_service: GeographyService=Depends(get_geography_service),
         anthropic_client: anthropic.AsyncAnthropic=Depends(get_anthropic_client),
+        supported_countries: list[str]=Depends(get_supported_countries),
+        supported_states: list[str]=Depends(get_supported_states),
+        supported_cities: list[str]=Depends(get_supported_cities),
 ) -> AgentService:
-    return AgentService(prediction_service, census_service, http_client, anthropic_client)
+    return AgentService(
+        prediction_service,
+        census_service,
+        geography_service,
+        anthropic_client,
+        supported_countries,
+        supported_states,
+        supported_cities,
+    )

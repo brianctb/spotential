@@ -1,99 +1,95 @@
 import json
 import logging
-from typing import Awaitable, Callable, NamedTuple
+from typing import Literal, Optional
 import anthropic
-import httpx
+from anthropic import beta_async_tool
+from anthropic.types.beta import BetaMessage
 from config.business_type import BusinessType, BUSINESS_CONFIGS
 from schema.agent import AgentMessage, AgentLocationResult, AgentChatResponse
+from schema.geography import GeographyResolution
 from service.PredictionService import PredictionService
 from service.CensusService import CensusService
+from service.GeographyService import GeographyService
 
 logger = logging.getLogger("uvicorn")
-
-
-class ToolResult(NamedTuple):
-    llm_output: dict
-    is_error: bool
-    # Only find_top_locations sets this; the shared empty-list default is
-    # never mutated in place, so reuse across instances is safe.
-    ui_payload: list[AgentLocationResult] = []
-
-
-ToolHandler = Callable[[dict], Awaitable[ToolResult]]
 
 MAX_TOOL_ITERATIONS = 4
 
 SYSTEM_PROMPT = (
-    "You are Spotential's location assistant. You help users find good places in "
-    "Vancouver, BC to open a business, using real census and business-density data. "
-    "Only discuss Vancouver locations and the business types you have tools for. "
-    "Keep replies to 2-3 sentences — the UI shows structured result cards separately, "
-    "don't restate them as prose."
+    "You are Spotential's location assistant. You help users find good places to open "
+    "a business in Metro Vancouver, BC — including Vancouver, Burnaby, Richmond, "
+    "Surrey, and other Lower Mainland municipalities — using real census and "
+    "business-density data. Only discuss locations and business types you have tools "
+    "for. When a user names more than one city or neighbourhood, put every one of "
+    "them into the tool call's city/neighbourhood array, not just the first. Always "
+    "use full names for state and country (e.g. 'British Columbia', not 'BC'; "
+    "'Canada'). Keep replies to 2-3 sentences — the UI shows structured result cards "
+    "separately, don't restate them as prose."
 )
 
 MODEL = "claude-haiku-4-5-20251001"
 
 TOOL_RESOLVE_BUSINESS_TYPE = "resolve_business_type"
-TOOL_GEOCODE_LOCATION = "geocode_location"
 TOOL_FIND_TOP_LOCATIONS = "find_top_locations"
 
-TOOLS = [
-    {
-        "name": TOOL_RESOLVE_BUSINESS_TYPE,
-        "description": (
-            "Map a free-text business idea (e.g. 'coffee shop', 'gym') to one of the "
-            "supported business type categories."
-        ),
-        "strict": True,
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "business_type": {
-                    "type": "string",
-                    "enum": [bt.value for bt in BusinessType],
-                    "description": "The closest matching supported business type.",
-                }
-            },
-            "required": ["business_type"],
-            "additionalProperties": False,
+
+def _build_tool_schemas(
+    supported_cities: list[str],
+    supported_states: list[str],
+    supported_countries: list[str],
+) -> tuple[dict, dict]:
+    resolve_business_type_schema = {
+        "type": "object",
+        "properties": {
+            "business_type": {
+                "type": "string",
+                "enum": [bt.value for bt in BusinessType],
+                "description": "The closest matching supported business type.",
+            }
         },
-    },
-    {
-        "name": TOOL_GEOCODE_LOCATION,
-        "description": (
-            "Look up latitude/longitude for a Vancouver place name or neighbourhood "
-            "mentioned by the user (e.g. 'Kitsilano', 'near Main St')."
-        ),
-        "strict": True,
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "query": {"type": "string", "description": "The place name to geocode."}
+        "required": ["business_type"],
+        "additionalProperties": False,
+    }
+    find_top_locations_schema = {
+        "type": "object",
+        "properties": {
+            "business_type": {"type": "string", "enum": [bt.value for bt in BusinessType]},
+            "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5,
+                "description": "How many locations to return (max 5).",
             },
-            "required": ["query"],
-            "additionalProperties": False,
-        },
-    },
-    {
-        "name": TOOL_FIND_TOP_LOCATIONS,
-        "description": "Get the top-scoring census tracts for a business type, ranked by opportunity score.",
-        "strict": True,
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "business_type": {"type": "string", "enum": [bt.value for bt in BusinessType]},
-                "limit": {"type": "integer", "description": "How many locations to return (max 5)."},
-                "order": {
-                    "type": "string",
-                    "enum": ["desc", "asc"],
-                    "description": "desc = best opportunity first.",
-                },
+            "order": {
+                "type": "string",
+                "enum": ["desc", "asc"],
+                "description": "desc = best opportunity first.",
             },
-            "required": ["business_type"],
-            "additionalProperties": False,
+            "city": {
+                "type": "array",
+                "items": {"type": "string", "enum": supported_cities},
+                "description": "Every city the user named, e.g. ['Vancouver', 'Burnaby'].",
+            },
+            "neighbourhood": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Every neighbourhood the user named, e.g. ['Kitsilano', 'Yaletown'].",
+            },
+            "state": {
+                "type": "string",
+                "enum": supported_states,
+                "description": "Full province/state name, e.g. 'British Columbia'.",
+            },
+            "country": {
+                "type": "string",
+                "enum": supported_countries,
+                "description": "Full country name, e.g. 'Canada'.",
+            },
         },
-    },
-]
+        "required": ["business_type"],
+        "additionalProperties": False,
+    }
+    return resolve_business_type_schema, find_top_locations_schema
 
 
 class AgentService:
@@ -101,103 +97,128 @@ class AgentService:
         self,
         prediction_service: PredictionService,
         census_service: CensusService,
-        http_client: httpx.AsyncClient,
+        geography_service: GeographyService,
         anthropic_client: anthropic.AsyncAnthropic,
+        supported_countries: list[str],
+        supported_states: list[str],
+        supported_cities: list[str],
     ):
         self.prediction_service = prediction_service
         self.census_service = census_service
-        self.http_client = http_client
+        self.geography_service = geography_service
         self.client = anthropic_client
-        self._handlers: dict[str, ToolHandler] = {
-            TOOL_RESOLVE_BUSINESS_TYPE: self._resolve_business_type,
-            TOOL_GEOCODE_LOCATION: self._handle_geocode,
-            TOOL_FIND_TOP_LOCATIONS: self._find_top_locations,
-        }
+        self._pending_location_results: list[AgentLocationResult] = []  # UI cards side channel, reset per chat()
+
+        resolve_schema, find_schema = _build_tool_schemas(
+            supported_cities, supported_states, supported_countries
+        )
+        self.tools = [
+            beta_async_tool(
+                self._resolve_business_type,
+                name=TOOL_RESOLVE_BUSINESS_TYPE,
+                description=(
+                    "Map a free-text business idea (e.g. 'coffee shop', 'gym') to one of the "
+                    "supported business type categories."
+                ),
+                input_schema=resolve_schema,
+                strict=True,
+            ),
+            beta_async_tool(
+                self._find_top_locations,
+                name=TOOL_FIND_TOP_LOCATIONS,
+                description=(
+                    "Get the top-scoring census tracts for a business type, ranked by "
+                    "opportunity score. Optionally scope to one or more cities, one or more "
+                    "neighbourhoods, a state, or a country. Put every city/neighbourhood the "
+                    "user names into the respective array in a single call — do not make "
+                    "separate calls per city."
+                ),
+                input_schema=find_schema,
+                strict=True,
+            ),
+        ]
 
     async def chat(self, messages: list[AgentMessage]) -> AgentChatResponse:
         anthropic_messages: list[dict] = [{"role": m.role, "content": m.content} for m in messages]
-        location_results: list[AgentLocationResult] = []
+        self._pending_location_results = []
 
-        # The API is stateless per call — anthropic_messages is replayed in full
-        # on every iteration (including any tool_use/tool_result pairs already
-        # appended below), so each new call gives Claude the entire history to
-        # either produce a final answer or chain another tool call.
-        for _ in range(MAX_TOOL_ITERATIONS):
-            response = await self.client.messages.create(
-                model=MODEL,
-                max_tokens=1024,
-                system=SYSTEM_PROMPT,
-                tools=TOOLS,  # pyright: ignore[reportArgumentType]
-                messages=anthropic_messages,  # pyright: ignore[reportArgumentType]
-            )
-            self._log_usage(response)
-
-            # Anything other than "tool_use" means Claude is done — return
-            # immediately with whatever text it produced.
-            if response.stop_reason != "tool_use":
-                return AgentChatResponse(reply=self._extract_text(response), results=location_results)
-
-            # stop_reason == "tool_use": execute every tool Claude asked for
-            # (a single turn can request more than one, in parallel) and build
-            # one tool_result per block, matched by tool_use_id so Claude can
-            # tell which result answers which request.
-            tool_results = []
-            for block in response.content:
-                if block.type != "tool_use":
-                    continue
-                result = await self._dispatch_tool(block.name, block.input)
-                tool_result: dict = {
-                    "type": "tool_result",
-                    "tool_use_id": block.id,
-                    "content": json.dumps(result.llm_output),
+        runner = self.client.beta.messages.tool_runner(
+            model=MODEL,
+            max_tokens=1024,
+            system=[  # pyright: ignore[reportArgumentType]
+                {
+                    "type": "text",
+                    "text": SYSTEM_PROMPT,
+                    "cache_control": {"type": "ephemeral"},
                 }
-                if result.is_error:
-                    tool_result["is_error"] = True
-                tool_results.append(tool_result)
-                # Cards accumulate across every tool round regardless of which
-                # iteration ends up returning.
-                location_results.extend(result.ui_payload)
+            ],
+            tools=self.tools,
+            messages=anthropic_messages,  # pyright: ignore[reportArgumentType]
+            max_iterations=MAX_TOOL_ITERATIONS,
+        )
 
-            # Replay Claude's own tool_use blocks (so it can match the results
-            # below to what it asked for), then supply the results as the next
-            # "user" turn — there's no separate "tool" role in this API. No
-            # return here: loop back and ask Claude again with these results
-            # now in context.
-            anthropic_messages.append({"role": "assistant", "content": response.content})  # pyright: ignore[reportArgumentType]
-            anthropic_messages.append({"role": "user", "content": tool_results})
+        # Each iteration is one full round: the runner calls the API, yields
+        # Claude's response, then (if it asked for a tool) runs that tool and
+        # loops back on its own for another round. Iterating manually here
+        # (instead of runner.until_done()) is what lets us log usage per
+        # round; final_message gets overwritten every round, so once the
+        # loop ends it's just whichever message Claude sent last.
+        final_message: Optional[BetaMessage] = None
+        async for message in runner:
+            self._log_usage(message)
+            final_message = message
+        assert final_message is not None  # runner always yields >=1 message
 
-        # Ran out of iterations without Claude ever giving a final text answer
-        # (every attempt came back tool_use) — bail out safely instead of
-        # looping forever or crashing.
-        logger.warning("agent chat exceeded max tool iterations")
+        # Still "tool_use" here means max_iterations cut the loop off mid
+        # tool-call, not that Claude chose to stop.
+        if final_message.stop_reason == "tool_use":
+            logger.warning("agent chat exceeded max tool iterations")
+            return AgentChatResponse(
+                reply="Sorry, I'm having trouble completing that request. Could you try rephrasing it?",
+                results=self._pending_location_results,
+            )
+
         return AgentChatResponse(
-            reply="Sorry, I'm having trouble completing that request. Could you try rephrasing it?",
-            results=location_results,
+            reply=self._extract_text(final_message), results=self._pending_location_results
         )
 
-    async def _dispatch_tool(self, name: str, tool_input: dict) -> ToolResult:
-        handler = self._handlers.get(name)
-        if handler is None:
-            return ToolResult({"error": f"unknown tool {name}"}, is_error=True)
-        return await handler(tool_input)
+    async def _resolve_business_type(self, business_type: str) -> str:
+        bt = BusinessType(business_type)
+        return json.dumps({"business_type": bt.value, "label": BUSINESS_CONFIGS[bt].label})
 
-    async def _resolve_business_type(self, tool_input: dict) -> ToolResult:
-        bt = BusinessType(tool_input["business_type"])
-        return ToolResult(
-            {"business_type": bt.value, "label": BUSINESS_CONFIGS[bt].label}, is_error=False
+    async def _find_top_locations(
+        self,
+        business_type: str,
+        limit: int = 5,
+        order: Literal["asc", "desc"] = "desc",
+        city: Optional[list[str]] = None,
+        neighbourhood: Optional[list[str]] = None,
+        state: Optional[str] = None,
+        country: Optional[str] = None,
+    ) -> str:
+        bt = BusinessType(business_type)
+        cities = city or None
+
+        neighbourhood_ids: Optional[list[int]] = None
+        if neighbourhood:
+            resolution = self.geography_service.resolve_neighbourhoods(
+                neighbourhood, cities=cities
+            )
+            if resolution.status != "found":
+                # ambiguous/not_found — a legitimate structured outcome for
+                # Claude to react to, not an exception.
+                return json.dumps(self._neighbourhood_failure_payload(resolution))
+            neighbourhood_ids = resolution.neighbourhood_ids
+
+        predictions = self.prediction_service.get_top_tracts(
+            bt,
+            limit,
+            order,
+            neighbourhood_ids=neighbourhood_ids,
+            cities=cities,
+            state=state,
+            country=country,
         )
-
-    async def _handle_geocode(self, tool_input: dict) -> ToolResult:
-        result = await self._geocode(tool_input["query"])
-        if result is None:
-            return ToolResult({"found": False}, is_error=False)
-        return ToolResult({"found": True, **result}, is_error=False)
-
-    async def _find_top_locations(self, tool_input: dict) -> ToolResult:
-        bt = BusinessType(tool_input["business_type"])
-        limit = tool_input.get("limit", 5)
-        order = tool_input.get("order", "desc")
-        predictions = self.prediction_service.get_top_tracts(bt, limit, order)
         centroids = self.census_service.get_tract_centroids(
             [p.tract_id for p in predictions]
         )
@@ -213,45 +234,33 @@ class AgentService:
             for p in predictions
             if p.tract_id in centroids
         ]
-        return ToolResult(
-            {"tracts": [{"tract_id": c.tract_id, "score": c.score} for c in cards]},
-            is_error=False,
-            ui_payload=cards,
-        )
-
-    async def _geocode(self, query: str) -> dict | None:
-        try:
-            resp = await self.http_client.get(
-                "https://nominatim.openstreetmap.org/search",
-                params={
-                    "q": query,
-                    "format": "json",
-                    "limit": 1,
-                    "viewbox": "-123.27,49.32,-123.02,49.20",
-                    "bounded": 1,
-                },
-                headers={"User-Agent": "Spotential/1.0"},
-                timeout=5.0,
-            )
-            resp.raise_for_status()
-            data = resp.json()
-        except (httpx.HTTPError, ValueError):
-            return None
-        if not data:
-            return None
-        return {"lat": float(data[0]["lat"]), "lng": float(data[0]["lon"])}
+        self._pending_location_results.extend(cards)
+        return json.dumps({"tracts": [{"tract_id": c.tract_id, "score": c.score} for c in cards]})
 
     @staticmethod
-    def _extract_text(response) -> str:
+    def _neighbourhood_failure_payload(resolution: GeographyResolution) -> dict:
+        if resolution.status == "ambiguous":
+            return {
+                "status": resolution.status,
+                "query": resolution.query,
+                "candidates": resolution.candidates,
+            }
+        return {"status": resolution.status, "query": resolution.query}
+
+    @staticmethod
+    def _extract_text(response: BetaMessage) -> str:
         return "".join(
             block.text for block in response.content if block.type == "text"
         )
 
     @staticmethod
-    def _log_usage(response) -> None:
+    def _log_usage(response: BetaMessage) -> None:
         logger.info(
-            "agent chat usage: model=%s input_tokens=%d output_tokens=%d",
+            "agent chat usage: model=%s input_tokens=%d output_tokens=%d "
+            "cache_creation_input_tokens=%d cache_read_input_tokens=%d",
             response.model,
             response.usage.input_tokens,
             response.usage.output_tokens,
+            response.usage.cache_creation_input_tokens or 0,
+            response.usage.cache_read_input_tokens or 0,
         )

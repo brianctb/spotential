@@ -1,5 +1,5 @@
 import math
-from typing import Literal
+from typing import Literal, Optional
 import pandas as pd
 from sqlmodel import Session, col, delete, select
 from xgboost import XGBRegressor
@@ -8,6 +8,8 @@ from schema.ml_model import ModelFeatures
 from service.BusinessService import BusinessService
 from service.CensusService import CensusService
 from models.model_outputs import ModelPrediction
+from models.census import CensusTract
+from models.geography import City, State, Country
 
 
 class PredictionService:
@@ -65,15 +67,37 @@ class PredictionService:
         business_type: BusinessType,
         limit: int,
         order: Literal["asc", "desc"] = "desc",
+        neighbourhood_ids: Optional[list[int]] = None,
+        cities: Optional[list[str]] = None,
+        state: Optional[str] = None,
+        country: Optional[str] = None,
     ) -> list[ModelPrediction]:
         capped_limit = min(limit, 5)
         score_col = col(ModelPrediction.prediction_score)
-        stmt = (
-            select(ModelPrediction)
-            .where(ModelPrediction.business_type == business_type.value)
-            .order_by(score_col.desc() if order == "desc" else score_col.asc())
-            .limit(capped_limit)
-        )
+        stmt = select(ModelPrediction).where(ModelPrediction.business_type == business_type.value)
+
+        # ModelPrediction has no geography FKs of its own — only tract_id — so
+        # any geography filter has to join through CensusTract. Only join/filter
+        # for fields actually provided; zero fields provided stays identical to
+        # the previous unfiltered query.
+        if neighbourhood_ids or cities or state or country:
+            stmt = stmt.join(CensusTract, col(ModelPrediction.tract_id) == col(CensusTract.tract_id))
+            if neighbourhood_ids:
+                stmt = stmt.where(col(CensusTract.neighbourhood_id).in_(neighbourhood_ids))
+            if cities:
+                stmt = stmt.join(City, col(CensusTract.city_id) == col(City.id)).where(
+                    col(City.name).in_(cities)
+                )
+            if state:
+                stmt = stmt.join(State, col(CensusTract.state_id) == col(State.id)).where(
+                    State.name == state
+                )
+            if country:
+                stmt = stmt.join(Country, col(CensusTract.country_id) == col(Country.id)).where(
+                    Country.name == country
+                )
+
+        stmt = stmt.order_by(score_col.desc() if order == "desc" else score_col.asc()).limit(capped_limit)
         return list(self.session.exec(stmt).all())
 
     def precompute_all_predictions(self) -> list[ModelPrediction]:
