@@ -1,6 +1,6 @@
-# AI Assistant Plan (draft — not yet implemented)
+# AI Assistant Plan (Phase 1 implemented; Phase 2 not started)
 
-A working design for a natural-language chat feature: user asks things like *"best 5 locations in Vancouver to open a gym"* or *"good coffee shop spots near Kitsilano"*, gets a reply plus clickable location results, and clicking a result flies the map to it and runs the normal analysis flow — same as dropping a pin manually. Kept here as context for when this gets picked up; nothing below has been built yet.
+A working design for a natural-language chat feature: user asks things like *"best 5 locations in Vancouver to open a gym"* or *"good coffee shop spots near Kitsilano"*, gets a reply plus clickable location results, and clicking a result flies the map to it and runs the normal analysis flow — same as dropping a pin manually. Phase 1's backend (`POST /agent/chat`, tool-calling, geography-aware location filtering — see `AGENT_LOCATION_TOOLS.md`) is built and live. Kept here as historical design record and as the plan for the still-unbuilt frontend wiring and Phase 2.
 
 ## Phase 1 — Tool-calling chat assistant (build this first)
 
@@ -26,6 +26,11 @@ User: "best 5 locations in Vancouver to open a gym"
     in parallel — e.g. resolve_business_type + find_top_locations together):
        "best 5 ... gym"        -> resolve_business_type + find_top_locations(limit=5, desc)
        "spots near Kitsilano"  -> resolve_business_type + geocode_location
+```
+
+**Note (as shipped):** `geocode_location` was dropped from the final implementation. Only `resolve_business_type` and `find_top_locations` exist today — the latter absorbed geography scoping directly (`city`/`neighbourhood`/`state`/`country` params), see `AGENT_LOCATION_TOOLS.md`.
+
+```
   → backend executes the matched tool(s), sends the tool_result(s) back to Claude for a final
     reply (this round-trip is just correct tool-use mechanics, not the "agentic" part), returns
     { reply: str, results: AgentLocationResult[] }
@@ -45,15 +50,15 @@ SELECT * FROM model_predictions WHERE business_type = :bt ORDER BY prediction_sc
 
 joined with `CensusTract` for a representative point (`ST_X/ST_Y(ST_Centroid(geom))` — no existing centroid method, would need to add one; there's a one-off precedent in `scripts/census/load_census_geo.py`). No live XGBoost inference needed for this feature. Caveat: this cache is only as fresh as the last `precompute_tracts.py` run.
 
-### Backend steps (not yet done)
+### Backend steps (implemented)
 
-1. `uv add anthropic`; add `ANTHROPIC_API_KEY` to `backend/.env`/`.env.dev` (read via `os.getenv`, matching existing pattern).
-2. Small Nominatim geocoding helper (via `httpx`, already a dependency), bounded to a Vancouver viewbox.
-3. New method on `PredictionService`: `get_top_tracts(business_type, limit, order)` — queries `model_predictions` joined to `CensusTract` centroid, capped server-side (e.g. max 10) regardless of requested limit.
-4. New schemas in `backend/schema/response.py`: `AgentLocationResult` (tract_id, label, business_type, score, lat, lng), `AgentChatResponse` (reply, results[]) — patterned after existing `TractStats`/`AnalysisResponse`.
-5. New `backend/service/agent_service.py`: `AgentService` (constructor-injected with `PredictionService` + geocode helper, same `Depends` pattern as `AnalysisService`), defines the three tool schemas, runs the send → execute tool(s) → send tool_result → final reply round-trip, returns `AgentChatResponse`.
-6. New `backend/routers/agent.py`: `POST /agent/chat`, body `{messages: [...]}` (stateless, frontend owns history), wired via `dependencies.py`.
-7. Tight rate limit on this route specifically (e.g. `8/minute;30/day`), stricter than the app default.
+1. `uv add anthropic`; `ANTHROPIC_API_KEY` in `backend/.env`/`.env.dev` (read via `os.environ`, matching existing pattern).
+2. ~~Small Nominatim geocoding helper~~ — superseded by DB-driven geography filtering, see `AGENT_LOCATION_TOOLS.md`.
+3. `PredictionService.get_top_tracts(...)` — queries `model_predictions` joined to `CensusTract`, geography-filterable, capped server-side regardless of requested limit.
+4. Schemas actually live in `backend/schema/agent.py` (not `schema/response.py` as originally planned): `AgentLocationResult` (tract_id, label, business_type, score, lat, lng), `AgentChatResponse` (reply, results[]).
+5. `backend/service/AgentService.py` (not `agent_service.py` as originally planned): constructor-injected with `PredictionService`, `CensusService`, `GeographyService`, same `Depends` pattern as `AnalysisService`; defines tool schemas, runs the Anthropic SDK's beta Tool Runner loop, returns `AgentChatResponse`.
+6. `backend/routers/agent.py`: `POST /agent/chat`, body `{messages: [...]}` (stateless, frontend owns history), wired via `dependencies.py`.
+7. Rate limit on this route: `3/minute;10/day` per IP (tighter than originally planned `8/minute;30/day`), stricter than the app default.
 
 ### Frontend steps (not yet done)
 

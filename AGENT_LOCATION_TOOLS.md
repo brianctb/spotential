@@ -1,6 +1,6 @@
 # Agent tools: geography-aware location filtering (+ prompt caching)
 
-Design notes from a planning discussion, kept for continuing on another machine. Nothing here is implemented yet.
+Design notes from a planning discussion. **Implemented** on `feature/agentic-backend` — see current `backend/service/AgentService.py`, `backend/service/GeographyService.py`, and `backend/schema/geography.py`. Kept as historical design record.
 
 ## Problem statement (context only, no solution — for prompting another AI)
 
@@ -8,7 +8,7 @@ Spotential is a location-intelligence platform that scores business opportunitie
 
 ## Feature
 
-The agent backend (`backend/service/AgentService.py`, uncommitted on `feature/agentic-backend`) exposes 3 tools to Claude: `resolve_business_type`, `geocode_location`, and `find_top_locations`. The goal is to make `find_top_locations` handle location scoping so prompts like these all work:
+The agent backend (`backend/service/AgentService.py`, on `feature/agentic-backend`) exposes 2 tools to Claude: `resolve_business_type` and `find_top_locations` — the previously-planned `geocode_location` tool is not present in the current implementation. The goal is to make `find_top_locations` handle location scoping so prompts like these all work:
 
 - "top 5 locations for opening a gym in Vancouver"
 - "top 6 locations for opening a gym in Burnaby, Vancouver" (multiple cities, one combined ranked result set)
@@ -34,7 +34,7 @@ Separately, since this codebase sets no `cache_control` anywhere today, this rou
 - `backend/scripts/census/load_tract.py:21` loads all tracts whose `CTUID` starts with `933` — the StatCan code for the **Vancouver Census Metropolitan Area**, spanning Vancouver, Burnaby, Richmond, Surrey, and other Lower Mainland municipalities. So "Burnaby" is in-scope data; the agent's current system prompt ("Only discuss Vancouver locations") undersells actual coverage.
 - "Canada" / "British Columbia"-level queries need no special-casing: every loaded tract already belongs to that one country/state row, so filtering by them is a no-op that returns the same set as unfiltered.
 
-The existing `geocode_location` tool (Nominatim, hardcoded Vancouver bounding box) solves a different problem — free-text → raw lat/lng for a point — and stays untouched.
+A `geocode_location` tool (Nominatim, hardcoded Vancouver bounding box) was discussed as solving a different problem — free-text → raw lat/lng for a point — but is not present in the current implementation.
 
 ## Tool architecture decision
 
@@ -80,7 +80,7 @@ For `neighbourhood` (the only field that stays free text): yes, honestly — pur
 
 A bug in the original (pre-session) two-parallel-calls design: each `find_top_locations` call independently caps at `min(limit, 5)`, so two calls for two cities can return up to 10 merged results, not the requested 6. **Fix**: `city` (and `neighbourhood`, for the same reason) became array-typed fields, filtered with an `IN` clause in one call, so ranking happens across all named cities/neighbourhoods together with a single, correctly-applied `LIMIT`.
 
-## Planned file changes (not yet implemented)
+## File changes (implemented)
 
 - `backend/main.py` — `lifespan` gains a one-time startup query (alongside `fastapi_app.state.model = joblib.load(...)`): `fastapi_app.state.supported_countries/states/cities = sorted(...)` from `Country`/`State`/`City`. No `config/geography.py` — the DB is the sole source of truth.
 - `backend/schema/geography.py` (new) — one class:
@@ -104,7 +104,7 @@ A bug in the original (pre-session) two-parallel-calls design: each `find_top_lo
 
 No `State.code` column, no migration for it, no frontend changes — `AgentChatResponse` / `AgentLocationResult` shapes are unchanged.
 
-## Verification plan (once implemented)
+## Verification checklist
 
 1. `cd backend && uv run fastapi dev`, then exercise `POST /agent/chat` with:
    - "top 5 gyms in Vancouver" vs "...in Burnaby" — different tract sets.

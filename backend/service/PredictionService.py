@@ -72,7 +72,7 @@ class PredictionService:
         state: Optional[str] = None,
         country: Optional[str] = None,
     ) -> list[ModelPrediction]:
-        capped_limit = min(limit, 5)
+        capped_limit = max(1, min(limit, 5))
         score_col = col(ModelPrediction.prediction_score)
         stmt = select(ModelPrediction).where(ModelPrediction.business_type == business_type.value)
 

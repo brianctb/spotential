@@ -23,8 +23,11 @@ SYSTEM_PROMPT = (
     "for. When a user names more than one city or neighbourhood, put every one of "
     "them into the tool call's city/neighbourhood array, not just the first. Always "
     "use full names for state and country (e.g. 'British Columbia', not 'BC'; "
-    "'Canada'). Keep replies to 2-3 sentences — the UI shows structured result cards "
-    "separately, don't restate them as prose."
+    "'Canada'). find_top_locations' limit must match the count the user asked for, "
+    "not always 5 — e.g. if the user asks for 'top 3 gyms in Vancouver', call "
+    "find_top_locations with limit=3, not limit=5. Only use limit=5 if the user "
+    "didn't mention a number at all. Keep replies to 2-3 sentences — the UI shows "
+    "structured result cards separately, don't restate them as prose."
 )
 
 MODEL = "claude-haiku-4-5-20251001"
@@ -56,9 +59,11 @@ def _build_tool_schemas(
             "business_type": {"type": "string", "enum": [bt.value for bt in BusinessType]},
             "limit": {
                 "type": "integer",
-                "minimum": 1,
-                "maximum": 5,
-                "description": "How many locations to return (max 5).",
+                "description": (
+                    "REQUIRED — how many locations to return. Must equal the count "
+                    "the user asked for: 'top 3' -> 3, 'top 5' -> 5, 'best one' -> 1. "
+                    "Only use 5 if the user gave no number at all. Max 5."
+                ),
             },
             "order": {
                 "type": "string",
@@ -86,7 +91,7 @@ def _build_tool_schemas(
                 "description": "Full country name, e.g. 'Canada'.",
             },
         },
-        "required": ["business_type"],
+        "required": ["business_type", "limit"],
         "additionalProperties": False,
     }
     return resolve_business_type_schema, find_top_locations_schema
@@ -196,6 +201,11 @@ class AgentService:
         state: Optional[str] = None,
         country: Optional[str] = None,
     ) -> str:
+        logger.info(
+            "find_top_locations call: business_type=%s limit=%s order=%s city=%s "
+            "neighbourhood=%s state=%s country=%s",
+            business_type, limit, order, city, neighbourhood, state, country,
+        )
         bt = BusinessType(business_type)
         cities = city or None
 
