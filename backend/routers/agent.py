@@ -13,7 +13,7 @@ router = APIRouter(prefix="/agent", tags=["agent"])
 
 
 @router.post("/chat", response_model=AgentChatResponse)
-@limiter.limit("3/minute;10/day")
+@limiter.limit("3/minute;20/day")
 async def chat(
         request: Request,
         body: AgentChatRequest,

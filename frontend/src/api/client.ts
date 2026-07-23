@@ -1,5 +1,15 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+export class ApiError extends Error {
+    status: number;
+
+    constructor(status: number, message: string) {
+        super(message);
+        this.name = "ApiError";
+        this.status = status;
+    }
+}
+
 export const apiClient = {
     get: async <T>(
         path: string,
@@ -23,7 +33,24 @@ export const apiClient = {
         });
 
         if (!response.ok) {
-            throw new Error(await response.text());
+            throw new ApiError(response.status, await response.text());
+        }
+        return response.json();
+    },
+
+    post: async <T>(path: string, body: unknown): Promise<T> => {
+        const url = new URL(`${BASE_URL}${path}`);
+
+        const response = await fetch(url.toString(), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+        });
+
+        if (!response.ok) {
+            throw new ApiError(response.status, await response.text());
         }
         return response.json();
     },

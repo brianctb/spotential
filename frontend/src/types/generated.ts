@@ -89,17 +89,17 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/": {
+    "/agent/chat": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Root */
-        get: operations["root__get"];
+        get?: never;
         put?: never;
-        post?: never;
+        /** Chat */
+        post: operations["chat_agent_chat_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -127,6 +127,42 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AgentChatRequest */
+        AgentChatRequest: {
+            /** Messages */
+            messages: components["schemas"]["AgentMessage"][];
+        };
+        /** AgentChatResponse */
+        AgentChatResponse: {
+            /** Reply */
+            reply: string;
+            /** Results */
+            results: components["schemas"]["AgentLocationResult"][];
+        };
+        /** AgentLocationResult */
+        AgentLocationResult: {
+            /** Tract Id */
+            tract_id: string;
+            /** Label */
+            label: string;
+            business_type: components["schemas"]["BusinessType"];
+            /** Score */
+            score: number;
+            /** Lat */
+            lat: number;
+            /** Lng */
+            lng: number;
+        };
+        /** AgentMessage */
+        AgentMessage: {
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "user" | "assistant";
+            /** Content */
+            content: string;
+        };
         /** AnalysisResponse */
         AnalysisResponse: {
             tract: components["schemas"]["TractFeature"];
@@ -139,7 +175,7 @@ export interface components {
             /** Osm Id */
             osm_id: number;
             /** Tract Id */
-            tract_id: string | null;
+            tract_id?: string | null;
             /** Name */
             name: string;
             type: components["schemas"]["BusinessType"];
@@ -461,14 +497,18 @@ export interface operations {
             };
         };
     };
-    root__get: {
+    chat_agent_chat_post: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgentChatRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -476,7 +516,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["AgentChatResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
