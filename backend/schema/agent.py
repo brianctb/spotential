@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Optional
 from pydantic import BaseModel, Field
 from config.business_type import BusinessType
 
@@ -19,6 +19,12 @@ class AgentLocationResult(BaseModel):
     score: float
     lat: float
     lng: float
+    predicted_count: float
+    actual_count: int
+    neighbourhood: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
 
 
 class AgentChatResponse(BaseModel):

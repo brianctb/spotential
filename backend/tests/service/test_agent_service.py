@@ -54,6 +54,10 @@ class TestFindTopLocations:
             "9330038.00": (-123.1, 49.25),
             "9330045.02": (-123.2, 49.26),
         }
+        mock_census_service.get_tract_geography.return_value = {
+            "9330038.00": ("Cameron", "Burnaby", "British Columbia", "Canada"),
+            "9330045.02": (None, "Vancouver", "British Columbia", "Canada"),
+        }
 
         raw = await agent_service._find_top_locations(business_type="fitness_centre", limit=2)
         payload = json.loads(raw)
@@ -69,11 +73,13 @@ class TestFindTopLocations:
         assert agent_service._pending_location_results == [
             AgentLocationResult(
                 tract_id="9330038.00", label="Gym", business_type=BusinessType.FITNESS_CENTRE,
-                score=79.9, lng=-123.1, lat=49.25,
+                score=79.9, lng=-123.1, lat=49.25, predicted_count=3.2, actual_count=1,
+                neighbourhood="Cameron", city="Burnaby", state="British Columbia", country="Canada",
             ),
             AgentLocationResult(
                 tract_id="9330045.02", label="Gym", business_type=BusinessType.FITNESS_CENTRE,
-                score=68.2, lng=-123.2, lat=49.26,
+                score=68.2, lng=-123.2, lat=49.26, predicted_count=3.2, actual_count=1,
+                neighbourhood=None, city="Vancouver", state="British Columbia", country="Canada",
             ),
         ]
 
@@ -87,6 +93,7 @@ class TestFindTopLocations:
         ]
         # Only one of the two tracts has a centroid on record.
         mock_census_service.get_tract_centroids.return_value = {"9330038.00": (-123.1, 49.25)}
+        mock_census_service.get_tract_geography.return_value = {}
 
         raw = await agent_service._find_top_locations(business_type="fitness_centre", limit=2)
         payload = json.loads(raw)
@@ -138,6 +145,7 @@ class TestFindTopLocations:
     ):
         mock_prediction_service.get_top_tracts.return_value = []
         mock_census_service.get_tract_centroids.return_value = {}
+        mock_census_service.get_tract_geography.return_value = {}
 
         await agent_service._find_top_locations(
             business_type="fitness_centre",
@@ -195,7 +203,7 @@ class TestChat:
         agent_service._pending_location_results = [
             AgentLocationResult(
                 tract_id="stale", label="Gym", business_type=BusinessType.FITNESS_CENTRE,
-                score=1.0, lng=0.0, lat=0.0,
+                score=1.0, lng=0.0, lat=0.0, predicted_count=1.0, actual_count=1,
             )
         ]
         mock_anthropic_client.beta.messages.tool_runner.return_value = stub_tool_runner(

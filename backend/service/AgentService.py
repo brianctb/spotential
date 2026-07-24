@@ -239,18 +239,32 @@ class AgentService:
         centroids = self.census_service.get_tract_centroids(
             [p.tract_id for p in predictions]
         )
-        cards = [
-            AgentLocationResult(
-                tract_id=p.tract_id,
-                label=BUSINESS_CONFIGS[bt].label,
-                business_type=bt,
-                score=p.prediction_score,
-                lng=centroids[p.tract_id][0],
-                lat=centroids[p.tract_id][1],
+        geography = self.census_service.get_tract_geography(
+            [p.tract_id for p in predictions]
+        )
+        cards = []
+        for p in predictions:
+            if p.tract_id not in centroids:
+                continue
+            neighbourhood_name, city_name, state_name, country_name = geography.get(
+                p.tract_id, (None, None, None, None)
             )
-            for p in predictions
-            if p.tract_id in centroids
-        ]
+            cards.append(
+                AgentLocationResult(
+                    tract_id=p.tract_id,
+                    label=BUSINESS_CONFIGS[bt].label,
+                    business_type=bt,
+                    score=p.prediction_score,
+                    lng=centroids[p.tract_id][0],
+                    lat=centroids[p.tract_id][1],
+                    predicted_count=p.predicted_count,
+                    actual_count=p.actual_count,
+                    neighbourhood=neighbourhood_name,
+                    city=city_name,
+                    state=state_name,
+                    country=country_name,
+                )
+            )
         self._pending_location_results.extend(cards)
         return json.dumps({"tracts": [{"tract_id": c.tract_id, "score": c.score} for c in cards]})
 

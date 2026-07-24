@@ -1,4 +1,6 @@
+from typing import Optional
 from models.census import CensusTract, CensusDemographics
+from models.geography import Neighbourhood, City, State, Country
 from sqlmodel import Session, col, func, select
 from schema.response import CensusDemographicsBase
 import json
@@ -46,6 +48,27 @@ class CensusService:
         return {
             tract_id: (lng, lat)
             for tract_id, lng, lat in self.session.exec(stmt).all()
+        }
+
+    def get_tract_geography(
+        self, tract_ids: list[str]
+    ) -> dict[str, tuple[Optional[str], Optional[str], Optional[str], Optional[str]]]:
+        # isouter=True on every join: country_id/state_id/city_id/neighbourhood_id
+        # are all nullable on CensusTract — a tract can legitimately be missing
+        # a neighbourhood assignment (reverse-geocoding coverage isn't 100%).
+        stmt = (
+            select(  # pyright: ignore[reportCallIssue]
+                CensusTract.tract_id, Neighbourhood.name, City.name, State.name, Country.name
+            )
+            .join(Neighbourhood, col(CensusTract.neighbourhood_id) == col(Neighbourhood.id), isouter=True)
+            .join(City, col(CensusTract.city_id) == col(City.id), isouter=True)
+            .join(State, col(CensusTract.state_id) == col(State.id), isouter=True)
+            .join(Country, col(CensusTract.country_id) == col(Country.id), isouter=True)
+            .where(col(CensusTract.tract_id).in_(tract_ids))
+        )
+        return {
+            tract_id: (neighbourhood, city, state, country)
+            for tract_id, neighbourhood, city, state, country in self.session.exec(stmt).all()
         }
 
     def get_all_tracts(self) -> list[tuple[str, CensusDemographicsBase]]:

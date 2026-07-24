@@ -152,6 +152,18 @@ export interface components {
             lat: number;
             /** Lng */
             lng: number;
+            /** Predicted Count */
+            predicted_count: number;
+            /** Actual Count */
+            actual_count: number;
+            /** Neighbourhood */
+            neighbourhood?: string | null;
+            /** City */
+            city?: string | null;
+            /** State */
+            state?: string | null;
+            /** Country */
+            country?: string | null;
         };
         /** AgentMessage */
         AgentMessage: {
