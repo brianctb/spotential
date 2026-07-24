@@ -9,10 +9,13 @@ export const ChatTab = () => {
   const { messages, sendMessage, isSending } = useAgentChat();
 
   return (
-    <div className="flex flex-col gap-3 pb-4">
+    <div className="flex min-h-full flex-col gap-3">
       <ChatMessageList messages={messages} isSending={isSending} />
-      <Separator className="opacity-50" />
-      <ChatInputBar onSend={sendMessage} disabled={isSending} />
+
+      <div className="sticky bottom-0 bg-background pt-2 pb-4">
+        <Separator className="opacity-50 mb-3" />
+        <ChatInputBar onSend={sendMessage} disabled={isSending} />
+      </div>
     </div>
   );
 };

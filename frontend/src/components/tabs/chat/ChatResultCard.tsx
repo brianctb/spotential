@@ -20,7 +20,7 @@ export const ChatResultCard = ({ result }: { result: AgentLocationResult }) => {
         <Button
           size="sm"
           variant="secondary"
-          className="w-full"
+          className="w-full hover:bg-primary hover:text-primary-foreground hover:shadow-sm"
           onClick={() => commitLocation(result.business_type, result.lat, result.lng)}
         >
           View on map
